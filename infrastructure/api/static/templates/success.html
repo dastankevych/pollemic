@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Success{% endblock %}
+
+{% block content %}
+<div class="alert alert-success">
+    <h4 class="alert-heading">Success!</h4>
+    <p>Questionnaire created successfully with ID: {{ questionnaire_id }}</p>
+    <hr>
+    <p class="mb-0">
+        <a href="/questionnaires/create" class="btn btn-primary">Create Another</a>
+        <a href="/infrastructure/api/static" class="btn btn-secondary">Home</a>
+    </p>
+</div>
+{% endblock %}
