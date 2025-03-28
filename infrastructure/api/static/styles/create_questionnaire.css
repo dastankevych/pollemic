@@ -1,0 +1,186 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: #f0f0f0;
+}
+
+/* Основной контейнер всей страницы */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.header_main {
+    flex: none; /* фиксированная высота */
+}
+
+.main_content {
+    flex: 1; /* занимает оставшееся пространство */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding-top: 80px;
+}
+
+.frm {
+    background: white;
+    padding: 24px;
+    width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.top {
+    padding: 0 0 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ttl, .dsc {
+    width: calc(100% - 32px - 2px); /* 100% - padding(left+right) - border(left+right) */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.ttl {
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.ttl:focus {
+    outline: none;
+    border-color: #673ab7;
+    box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+}
+
+.dsc {
+    font-size: 16px;
+    min-height: 80px;
+    color: #666;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.dsc:focus {
+    outline: none;
+    border-color: #673ab7;
+    box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+}
+
+.q {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 16px;
+    border: 1px solid #e0e0e0;
+}
+
+.qt {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.qin {
+    flex-grow: 1;
+    font-size: 16px;
+    padding: 8px;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.sel {
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.opt {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.btn {
+    background: #673ab7;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn.del {
+    background: white;
+    border: 2px solid #ddd;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.btn.del:hover {
+    background: #fff0f0;
+    border-color: #ff5252;
+    color: #ff5252;
+}
+
+.btn.add {
+    background: #4caf50;
+}
+
+.btn.add:hover {
+    background: #43a047;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.q.dragging {
+    opacity: 0.5;
+    border: 2px dashed #673ab7;
+}
+
+.q .drag {
+    cursor: move;
+    padding: 8px;
+    margin-right: 8px;
+    color: #666;
+    user-select: none;
+}
+
+.create-survey {
+    display: block;
+    width: 100%;
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.create-survey:hover {
+    background: #1976D2;
+}

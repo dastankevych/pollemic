@@ -1,0 +1,13 @@
+aiogram~=3.0
+environs~=9.0
+redis
+loguru
+
+backoff
+ujson
+yarl
+jinja2~=3.1.5
+
+sqlalchemy~=2.0
+alembic~=1.0
+asyncpg

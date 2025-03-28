@@ -1,0 +1,102 @@
+### Variables are defined in http-client.env.json
+@baseUrl = localhost/questionnaires
+
+### List all questionnaires
+GET {{baseUrl}}
+Accept: application/json
+
+### List limited number of questionnaires
+GET {{baseUrl}}?limit=5
+Accept: application/json
+
+### Get latest questionnaires (default limit 10)
+GET {{baseUrl}}/latest
+Accept: application/json
+
+### Get latest questionnaires with custom limit
+GET {{baseUrl}}/latest?limit=3
+Accept: application/json
+
+### Get specific questionnaire by ID
+GET {{baseUrl}}/8
+Accept: application/json
+
+### Create new questionnaire
+POST {{baseUrl}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "title": "Student Satisfaction Survey!!!",
+    "description": "!!Survey about student satisfaction with university services",
+    "questions": [
+        {
+            "text": "!!!How satisfied ardsadsae you with the quality of teaching?",
+            "type": "single_choice",
+            "options": [
+                "Very satisfied",
+                "Satisfied",
+                "Neutral",
+                "Dissatisfied",
+                "Very dissatisfied"
+            ]
+        },
+        {
+            "text": "Which university services do you use regularly?",
+            "type": "multiple_choice",
+            "options": [
+                "Library",
+                "Sports facilities",
+                "Cafeteria",
+                "Student support services",
+                "Career center"
+            ]
+        },
+        {
+            "text": "Any additional comments or suggestions?",
+            "type": "text",
+            "options": null
+        }
+    ],
+    "is_anonymous": true,
+    "created_by": 123456789
+}
+
+### Update existing questionnaire
+PUT {{baseUrl}}/9
+Accept: application/json
+Content-Type: application/json
+
+{
+    "title": "Updated Student Satisfaction Survey",
+    "description": "Updated survey about student satisfaction",
+    "questions": [
+        {
+            "text": "Rate your overall satisfaction with the university",
+            "type": "single_choice",
+            "options": [
+                "Excellent",
+                "Good",
+                "Average",
+                "Poor",
+                "Very poor"
+            ]
+        }
+    ],
+    "is_anonymous": true,
+    "created_by": 123456789
+}
+
+### Delete questionnaire
+DELETE {{baseUrl}}/9
+Accept: application/json
+
+### Assign questionnaire to group
+POST {{baseUrl}}/8/assign
+Accept: application/json
+Content-Type: application/json
+
+{
+    "group_id": -1002478084589,
+    "due_date": "2025-01-30T23:59:59"
+} 

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Create Survey</title>
+{% endblock %}
+
+{% block fonts %}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="/static/styles/create_questionnaire.css">
+{% endblock %}
+
+{% block content %}
+    <div class="frm">
+        <div class="top">
+            <input class="ttl" placeholder="Title" autocomplete="off">
+            <textarea class="dsc" placeholder="Description"></textarea>
+        </div>
+        <div id="questions"></div>
+        <button class="btn add" onclick="addQuestion()">Add Question</button>
+        <button class="create-survey" onclick="createSurvey()">Create Survey</button>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/scripts/create_questionnaire.js"></script>
+{% endblock %}
