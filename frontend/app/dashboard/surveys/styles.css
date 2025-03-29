@@ -73,6 +73,94 @@
   background-color: #e6f7e6;
   color: #2e7d32;
 }
+/* Стили для обертки элемента списка опросников */
+.survey-item-wrapper {
+  position: relative;
+  display: flex;
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Стили для элементов списка опросников */
+.survey-item {
+  flex: 1;
+  transition: all 0.3s ease;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.survey-item-wrapper:hover {
+  transform: translateY(-2px);
+}
+
+.survey-item-wrapper:hover .survey-item {
+  border-color: #3b82f6;
+}
+
+/* Стили для язычка со стрелкой */
+.tab-indicator {
+  width: 0;
+  background-color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.survey-item-wrapper:hover .tab-indicator {
+  width: 40px;
+}
+
+/* Стили для модального окна в стиле Telegram */
+.telegram-chat-style {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.telegram-chat-container {
+  max-width: 450px !important;
+}
+
+.message-bubble {
+  animation: message-appear 0.2s ease forwards; /* Ускоренная анимация появления сообщений */
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для Badge */
+.badge-success {
+  background-color: #e6f7e6;
+  color: #2e7d32;
+  pointer-events: none;
+}
+
+.badge-inactive {
+  background-color: #ffebee;
+  color: #c62828;
+  pointer-events: none;
+}
+
+/* Убираем затемнение фона при открытии модального окна */
+[data-state="open"].bg-background\/80 {
+  background-color: transparent !important;
+}
+
 
 .badge-inactive {
   background-color: #ffebee;

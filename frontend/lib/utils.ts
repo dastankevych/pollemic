@@ -8,13 +8,14 @@ export function cn(...inputs: ClassValue[]) {
 export function formatDate(dateString: string) {
   const date = new Date(dateString)
 
-  // Форматирование в стиле Telegram
+  // Format time in Telegram style (HH:MM)
   const hours = date.getHours().toString().padStart(2, "0")
   const minutes = date.getMinutes().toString().padStart(2, "0")
+  const time = `${hours}:${minutes}`
 
   return {
-    date: date.toLocaleDateString("ru-RU", { month: "long", day: "numeric" }),
-    time: `${hours}:${minutes}`,
+    time,
+    date: date.toLocaleDateString(),
   }
 }
 
