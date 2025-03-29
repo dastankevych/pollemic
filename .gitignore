@@ -83,7 +83,6 @@ frontend/out
 frontend/build
 frontend/dist
 frontend/coverage
-frontend/pollemic*.zip
 
 .env.local
 .env.development.local
