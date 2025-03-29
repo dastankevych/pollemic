@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# Python
+    # Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -12,7 +11,6 @@ env/
 
 # Environment and configuration files
 .env
-=======
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -87,13 +85,11 @@ frontend/dist
 frontend/coverage
 frontend/pollemic*.zip
 
->>>>>>> ebb9178 (add some pages)
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-<<<<<<< HEAD
 # Logs and databases
 *.log
 logs/
@@ -146,7 +142,6 @@ local/
 *.pem
 *.key
 *.crt
-=======
 *.sqlite
 *.sqlite3
 *.db
@@ -160,4 +155,3 @@ local/
 !.gitkeep
 !.env.example
 !.env.template
->>>>>>> ebb9178 (add some pages)

@@ -54,7 +54,26 @@ async def main():
 ```
 
 ### How to start the Database and make your first migration:
-1. Go to the `.env` file and fill in the database details if you haven't done so already.
+1. Create the `.env` file and fill according to the given template below.
+```
+BOT_TOKEN=123456:Your-TokEn_ExaMple
+ADMINS=123456,654321
+USE_REDIS=False
+
+POSTGRES_USER=someusername
+POSTGRES_PASSWORD=postgres_pass12345
+POSTGRES_DB=bot
+DB_HOST=pg_database
+
+REDIS_HOST=redis_cache
+REDIS_PORT=6388
+REDIS_DB=1
+REDIS_PASSWORD=someredispass
+
+
+WEBHOOK_EXPOSE=8001
+WEBHOOK_APP_NAME=webhook
+```
 
 2. Go to the `docker-compose.yml` file and uncomment the sections: `api`, `pg_database` and `volumes` to get started.
 

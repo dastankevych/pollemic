@@ -1,35 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
-import { SurveyQuestionBuilder } from "@/components/survey/survey-question-builder"
-import { SurveyPreview } from "@/components/survey/survey-preview"
+import { useToast } from "@/hooks/use-toast"
+import { SurveyBuilder } from "@/components/survey/survey-builder"
 
 export default function CreateSurveyPage() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [questions, setQuestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-
-  const handleAddQuestion = (question: any) => {
-    setQuestions([...questions, question])
-  }
-
-  const handleRemoveQuestion = (index: number) => {
-    const newQuestions = [...questions]
-    newQuestions.splice(index, 1)
-    setQuestions(newQuestions)
-  }
+  const surveyBuilderRef = useRef<any>(null)
 
   const handleSaveSurvey = async () => {
     if (!title) {
@@ -41,7 +29,10 @@ export default function CreateSurveyPage() {
       return
     }
 
-    if (questions.length === 0) {
+    if (!surveyBuilderRef.current) return
+    const surveyData = surveyBuilderRef.current.getSurveyData()
+
+    if (surveyData.questions.length === 0) {
       toast({
         variant: "destructive",
         title: "No questions",
@@ -112,22 +103,13 @@ export default function CreateSurveyPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="builder" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="builder">Question Builder</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-        </TabsList>
-        <TabsContent value="builder" className="space-y-4">
-          <SurveyQuestionBuilder
-            onAddQuestion={handleAddQuestion}
-            questions={questions}
-            onRemoveQuestion={handleRemoveQuestion}
-          />
-        </TabsContent>
-        <TabsContent value="preview">
-          <SurveyPreview title={title} description={description} questions={questions} />
-        </TabsContent>
-      </Tabs>
+      <SurveyBuilder
+        ref={surveyBuilderRef}
+        initialTitle={title}
+        initialDescription={description}
+        onTitleChange={setTitle}
+        onDescriptionChange={setDescription}
+      />
     </div>
   )
 }

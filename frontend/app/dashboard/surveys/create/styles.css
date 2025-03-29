@@ -1,0 +1,37 @@
+.question-item.dragging,
+.option-item.dragging {
+  opacity: 0.5;
+}
+
+.question-item,
+.option-item {
+  transition: transform 0.2s ease;
+}
+
+.question-item:hover,
+.option-item:hover {
+  transform: translateX(2px);
+}
+
+/* Стили для контейнера опций */
+.options-container {
+  min-height: 40px;
+}
+
+/* Стили для индикатора вставки */
+.drop-indicator {
+  transition: all 0.2s ease;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
