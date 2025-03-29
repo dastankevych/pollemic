@@ -10,17 +10,21 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { SurveyBuilder } from "@/components/survey/survey-builder"
+import { createSurvey, CreateSurveyRequest, QuestionModel } from "@/services/survey-service"
+import { Switch } from "@/components/ui/switch"
 
 export default function CreateSurveyPage() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [isAnonymous, setIsAnonymous] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
   const surveyBuilderRef = useRef<any>(null)
 
   const handleSaveSurvey = async () => {
-    if (!title) {
+    // Валидация данных формы
+    if (!title.trim()) {
       toast({
         variant: "destructive",
         title: "Missing title",
@@ -32,7 +36,7 @@ export default function CreateSurveyPage() {
     if (!surveyBuilderRef.current) return
     const surveyData = surveyBuilderRef.current.getSurveyData()
 
-    if (surveyData.questions.length === 0) {
+    if (!surveyData.questions || surveyData.questions.length === 0) {
       toast({
         variant: "destructive",
         title: "No questions",
@@ -44,24 +48,56 @@ export default function CreateSurveyPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, this would be an API call to save the survey
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Трансформация вопросов из формата билдера в формат API
+      const questions: QuestionModel[] = surveyData.questions.map((q: any) => ({
+        text: q.text,
+        type: mapQuestionTypeToApi(q.type),
+        options: Array.isArray(q.options) ? q.options : null
+      }));
+
+      // Подготовка данных запроса
+      const requestData: CreateSurveyRequest = {
+        title,
+        description,
+        questions,
+        is_anonymous: isAnonymous,
+        created_by: getUserId() // В реальном приложении это должно приходить из системы аутентификации
+      };
+
+      // Вызов API для создания опроса
+      const response = await createSurvey(requestData);
 
       toast({
         title: "Survey created",
         description: "Your survey has been created successfully.",
       })
 
+      // Переход на страницу со списком опросов после успешного создания
       router.push("/dashboard/surveys")
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Failed to create survey",
-        description: "There was an error creating your survey. Please try again.",
+        description: error.message || "There was an error creating your survey. Please try again.",
       })
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Вспомогательная функция для преобразования типов вопросов из UI в API формат
+  const mapQuestionTypeToApi = (uiType: string): string => {
+    switch (uiType) {
+      case 'text': return 'text';
+      case 'radio': return 'single_choice';
+      case 'checkbox': return 'multiple_choice';
+      default: return uiType;
+    }
+  }
+
+  // В реальном приложении это должно приходить из системы аутентификации
+  const getUserId = (): number => {
+    return 123456789;
   }
 
   return (
@@ -99,6 +135,14 @@ export default function CreateSurveyPage() {
                 rows={3}
               />
             </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is-anonymous"
+                checked={isAnonymous}
+                onCheckedChange={setIsAnonymous}
+              />
+              <Label htmlFor="is-anonymous">Anonymous Survey</Label>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -113,4 +157,3 @@ export default function CreateSurveyPage() {
     </div>
   )
 }
-

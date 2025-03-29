@@ -1,12 +1,13 @@
-// frontend/components/survey/survey-list.tsx
-import { useState, useEffect } from "react"
+"use client"
+
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { PlusCircle, Edit, Eye, BarChart, Trash2, Copy, MoreHorizontal } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast"
+import { deleteSurvey, Survey } from "@/services/survey-service"
+import { Edit, Eye, BarChart, Trash2, Copy, MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,50 +16,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { useToast } from "@/hooks/use-toast"
-import { getSurveys, deleteSurvey } from "@/services/survey-service"
 
-// Define the structure of a survey from the API
-interface Survey {
-  id: number;
-  title: string;
-  description: string;
-  questions: Record<string, any>;
-  is_anonymous: boolean;
-  created_at: string;
-  created_by: number;
+interface SurveyListProps {
+  surveys: Survey[];
+  isLoading: boolean;
+  onDeleteSuccess?: (id: number) => void;
 }
 
-export function SurveyList() {
-  const [surveys, setSurveys] = useState<Survey[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+export function SurveyList({ surveys, isLoading, onDeleteSuccess }: SurveyListProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [surveyToDelete, setSurveyToDelete] = useState<number | null>(null)
   const { toast } = useToast()
   const router = useRouter()
-
-  useEffect(() => {
-    loadSurveys()
-  }, [])
-
-  const loadSurveys = async () => {
-    setIsLoading(true)
-    try {
-      const data = await getSurveys()
-      setSurveys(data)
-    } catch (error) {
-      console.error("Error loading surveys:", error)
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load surveys. Please try again later.",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleDeleteClick = (id: number) => {
     setSurveyToDelete(id)
@@ -70,11 +39,15 @@ export function SurveyList() {
 
     try {
       await deleteSurvey(surveyToDelete)
-      setSurveys(surveys.filter(survey => survey.id !== surveyToDelete))
       toast({
         title: "Survey deleted",
         description: "The survey has been successfully deleted.",
       })
+
+      // Notify parent component if callback provided
+      if (onDeleteSuccess) {
+        onDeleteSuccess(surveyToDelete)
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -105,31 +78,8 @@ export function SurveyList() {
     }
   }
 
-  const filteredSurveys = surveys.filter(survey =>
-    survey.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
   return (
-    <div className="flex flex-col gap-4">
-      <DashboardHeader heading="Surveys" text="Create and manage your surveys.">
-        <Link href="/dashboard/surveys/create">
-          <Button size="sm" className="h-9">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Survey
-          </Button>
-        </Link>
-      </DashboardHeader>
-
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Search surveys..."
-          className="max-w-sm"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {isLoading && <p className="text-sm text-muted-foreground">Loading surveys...</p>}
-      </div>
-
+    <>
       <div className="rounded-md border">
         <table className="w-full">
           <thead>
@@ -143,14 +93,14 @@ export function SurveyList() {
             </tr>
           </thead>
           <tbody>
-            {filteredSurveys.length === 0 ? (
+            {surveys.length === 0 ? (
               <tr>
                 <td colSpan={6} className="h-24 text-center">
                   {isLoading ? "Loading surveys..." : "No surveys found."}
                 </td>
               </tr>
             ) : (
-              filteredSurveys.map((survey) => (
+              surveys.map((survey) => (
                 <tr key={survey.id} className="border-b">
                   <td className="p-4 font-medium">{survey.title}</td>
                   <td className="p-4">
@@ -216,6 +166,6 @@ export function SurveyList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   )
 }
