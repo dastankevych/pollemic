@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { SurveyBuilder } from "@/components/survey/survey-builder"
-import { createSurvey, CreateSurveyRequest, QuestionModel } from "@/services/survey-service"
+import { createSurvey, CreateSurveyRequest, Question } from "@/services/survey-service"
 import { Switch } from "@/components/ui/switch"
 
 export default function CreateSurveyPage() {
@@ -49,7 +49,7 @@ export default function CreateSurveyPage() {
 
     try {
       // Трансформация вопросов из формата билдера в формат API
-      const questions: QuestionModel[] = surveyData.questions.map((q: any) => ({
+      const questions: Question[] = surveyData.questions.map((q: any) => ({
         text: q.text,
         type: mapQuestionTypeToApi(q.type),
         options: Array.isArray(q.options) ? q.options : null

@@ -10,25 +10,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { SurveyBuilder } from "@/components/survey/survey-builder"
-import { createSurvey, QuestionModel } from "@/services/survey-service"
+import { createSurvey, Question, Survey } from "@/services/survey-service"
 
 // Mock user ID - in a real app, this would come from authentication
 const CURRENT_USER_ID = 123456789;
-
-// Define the structure of a question in the survey builder
-interface SurveyBuilderQuestion {
-  id: number;
-  text: string;
-  type: "text" | "radio" | "checkbox";
-  options: string[];
-}
-
-// Define the structure of survey data from the survey builder
-interface SurveyBuilderData {
-  title: string;
-  description: string;
-  questions: SurveyBuilderQuestion[];
-}
 
 export default function SurveyCreationForm() {
   const [title, setTitle] = useState("")
@@ -50,7 +35,7 @@ export default function SurveyCreationForm() {
     }
 
     if (!surveyBuilderRef.current) return
-    const surveyData: SurveyBuilderData = surveyBuilderRef.current.getSurveyData()
+    const surveyData: Survey = surveyBuilderRef.current.getSurveyData()
 
     if (surveyData.questions.length === 0) {
       toast({
@@ -65,10 +50,11 @@ export default function SurveyCreationForm() {
 
     try {
       // Convert frontend question format to backend format
-      const questions = surveyData.questions.map((q: SurveyBuilderQuestion) => {
-        const questionModel: QuestionModel = {
+      const questions = surveyData.questions.map((q: Question) => {
+        const questionModel: Question = {
+          id: q.id,
           text: q.text,
-          type: mapQuestionType(q.type),
+          type: q.type,
           options: q.type !== "text" ? q.options : null
         }
         return questionModel
@@ -103,16 +89,6 @@ export default function SurveyCreationForm() {
       })
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  // Map frontend question types to backend question types
-  const mapQuestionType = (type: string): string => {
-    switch (type) {
-      case "text": return "text"
-      case "radio": return "single_choice"
-      case "checkbox": return "multiple_choice"
-      default: return "text"
     }
   }
 

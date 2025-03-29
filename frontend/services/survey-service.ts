@@ -3,10 +3,11 @@
 /**
  * Interface representing a question in a survey
  */
-export interface QuestionModel {
-  text: string;
-  type: string;
-  options: string[] | null;
+export interface Question {
+  id: number
+  text: string
+  type: "text" | "single" | "multiple"
+  options: string[] | null
 }
 
 /**
@@ -16,10 +17,11 @@ export interface Survey {
   id: number;
   title: string;
   description: string;
-  questions: Record<string, any>;
+  questions: Question[];
   is_anonymous: boolean;
   created_at: string;
   created_by: number;
+  status: boolean
 }
 
 /**
@@ -28,7 +30,7 @@ export interface Survey {
 export interface CreateSurveyRequest {
   title: string;
   description: string;
-  questions: QuestionModel[];
+  questions: Question[];
   is_anonymous: boolean;
   created_by: number;
 }
