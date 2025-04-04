@@ -4,10 +4,10 @@
  * Interface representing a question in a survey
  */
 export interface Question {
-  id: number
-  text: string
-  type: "text" | "single" | "multiple"
-  options: string[] | null
+  id: number;
+  text: string;
+  type: string;
+  options: string[] | null;
 }
 
 /**
@@ -17,11 +17,10 @@ export interface Survey {
   id: number;
   title: string;
   description: string;
-  questions: Question[];
+  questions: Question[] | Record<string, Question>;
   is_anonymous: boolean;
   created_at: string;
   created_by: number;
-  status: boolean
 }
 
 /**
@@ -111,6 +110,32 @@ export async function getSurveys(limit?: number): Promise<Survey[]> {
 }
 
 /**
+ * Fetches the latest surveys from the API
+ * @param limit Optional limit on the number of surveys to fetch
+ * @returns A promise that resolves to the list of latest surveys
+ */
+export async function getLatestSurveys(limit: number = 10): Promise<Survey[]> {
+  try {
+    const response = await fetch(`/questionnaires/latest?limit=${limit}`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to fetch latest surveys');
+    }
+
+    const data = await response.json() as SurveyListResponse;
+    return data.questionnaires || [];
+  } catch (error) {
+    console.error('Error in getLatestSurveys service:', error);
+    throw error;
+  }
+}
+
+/**
  * Fetches a specific survey by its ID
  * @param id The ID of the survey to fetch
  * @returns A promise that resolves to the survey data
@@ -142,7 +167,7 @@ export async function getSurveyById(id: number): Promise<Survey> {
  * @param surveyData The updated survey data
  * @returns A promise that resolves to the updated survey
  */
-export async function updateSurvey(id: number, surveyData: Partial<CreateSurveyRequest>): Promise<any> {
+export async function updateSurvey(id: number, surveyData: Partial<CreateSurveyRequest>): Promise<Survey> {
   try {
     const response = await fetch(`/questionnaires/${id}`, {
       method: 'PUT',

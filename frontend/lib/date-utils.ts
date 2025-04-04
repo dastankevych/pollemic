@@ -1,10 +1,4 @@
-// /lib/utils.ts
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+// /lib/date-utils.ts
 
 /**
  * Format date string for display in various formats
@@ -93,5 +87,25 @@ export function formatDate(dateString: string) {
       full: dateString,
       iso: dateString
     }
+  }
+}
+
+/**
+ * Simple date formatter
+ * @param dateString Date string to format
+ * @returns Formatted date string (or original if invalid)
+ */
+export function formatSimpleDate(dateString: string): string {
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return dateString
+
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  } catch (error) {
+    return dateString
   }
 }

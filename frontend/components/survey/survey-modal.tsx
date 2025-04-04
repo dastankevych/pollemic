@@ -7,14 +7,36 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react"
 import type { Survey } from "@/services/survey-service"
+import { normalizeSurveyQuestions } from "@/lib/survey-utils"
 
 interface SurveyModalProps {
   survey: Survey
   onCloseAction: () => void
 }
 
+interface ParsedQuestion {
+  id: number
+  text: string
+  type: "text" | "single_choice" | "multiple_choice"
+  options: string[] | null
+}
+
 export function SurveyModal({ survey, onCloseAction }: SurveyModalProps) {
+  const [parsedQuestions, setParsedQuestions] = useState<ParsedQuestion[]>([])
+
+  // Parse survey questions from the API format
+  useEffect(() => {
+    try {
+      const normalizedSurvey = normalizeSurveyQuestions(survey);
+      setParsedQuestions(normalizedSurvey.questions as ParsedQuestion[]);
+    } catch (error) {
+      console.error("Error parsing survey questions:", error);
+      setParsedQuestions([]);
+    }
+  }, [survey]);
+
   // Format date in Telegram style
   const formattedDate = formatDate(survey.created_at)
 
@@ -26,8 +48,7 @@ export function SurveyModal({ survey, onCloseAction }: SurveyModalProps) {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <Avatar className="h-8 w-8 mr-3">
-          <AvatarImage src="/placeholder-user.jpg" alt={`User ${survey.created_by}`} />
-          <AvatarFallback>{`U${survey.created_by}`}</AvatarFallback>
+          <AvatarFallback>P</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <h3 className="font-medium text-white text-sm">Pollemic</h3>
@@ -52,8 +73,31 @@ export function SurveyModal({ survey, onCloseAction }: SurveyModalProps) {
             <div className="text-xs text-gray-500 mt-1 text-right">{formattedDate.time}</div>
           </div>
 
+          {/* Survey privacy message - different for anonymous vs non-anonymous */}
+          {survey.is_anonymous ? (
+            <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[85%] relative message-bubble shadow-sm">
+              <p className="text-sm">
+                <span className="inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                  Anonymous
+                </span>
+                &nbsp;This survey is anonymous. Your responses will not be linked to your identity.
+              </p>
+              <div className="text-xs text-gray-500 mt-1 text-right">{formattedDate.time}</div>
+            </div>
+          ) : (
+            <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[85%] relative message-bubble shadow-sm">
+              <p className="text-sm">
+                <span className="inline-flex items-center rounded bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">
+                  Identified
+                </span>
+                &nbsp;This survey is not anonymous. Your responses will be visible to instructors.
+              </p>
+              <div className="text-xs text-gray-500 mt-1 text-right">{formattedDate.time}</div>
+            </div>
+          )}
+
           {/* Questions as separate messages */}
-          {survey.questions.map((question, index) => (
+          {parsedQuestions.map((question, index) => (
             <div
               key={question.id}
               className="bg-white p-3 rounded-lg rounded-tl-none max-w-[85%] relative message-bubble shadow-sm"
@@ -63,10 +107,10 @@ export function SurveyModal({ survey, onCloseAction }: SurveyModalProps) {
 
               {/* Display different question types */}
               {question.type === "text" && (
-                <div></div> // Empty div instead of "Enter your answer..." string
+                <div></div>
               )}
 
-              {question.type === "single" && question.options && (
+              {question.type === "single_choice" && question.options && (
                 <RadioGroup defaultValue="">
                   {question.options.map((option, i) => (
                     <div key={i} className="flex items-center space-x-2 mb-1 bg-gray-100 rounded p-2">
@@ -79,7 +123,7 @@ export function SurveyModal({ survey, onCloseAction }: SurveyModalProps) {
                 </RadioGroup>
               )}
 
-              {question.type === "multiple" && question.options && (
+              {question.type === "multiple_choice" && question.options && (
                 <div className="space-y-2">
                   {question.options.map((option, i) => (
                     <div key={i} className="flex items-center space-x-2 mb-1 bg-gray-100 rounded p-2">
@@ -100,4 +144,3 @@ export function SurveyModal({ survey, onCloseAction }: SurveyModalProps) {
     </div>
   )
 }
-

@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { SurveyBuilder } from "@/components/survey/survey-builder"
 import { createSurvey, Question, Survey } from "@/services/survey-service"
+import { normalizeSurveyQuestions } from "@/lib/survey-utils"
 
 // Mock user ID - in a real app, this would come from authentication
 const CURRENT_USER_ID = 123456789;
@@ -35,9 +36,9 @@ export default function SurveyCreationForm() {
     }
 
     if (!surveyBuilderRef.current) return
-    const surveyData: Survey = surveyBuilderRef.current.getSurveyData()
+    const surveyData = surveyBuilderRef.current.getSurveyData()
 
-    if (surveyData.questions.length === 0) {
+    if (!surveyData.questions || surveyData.questions.length === 0) {
       toast({
         variant: "destructive",
         title: "No questions",
@@ -49,16 +50,24 @@ export default function SurveyCreationForm() {
     setIsLoading(true)
 
     try {
-      // Convert frontend question format to backend format
-      const questions = surveyData.questions.map((q: Question) => {
-        const questionModel: Question = {
+      // First normalize survey questions to ensure we have an array
+      const normalizedSurvey = normalizeSurveyQuestions({
+        ...surveyData,
+        id: 0, // Temporary ID
+        is_anonymous: isAnonymous,
+        created_at: new Date().toISOString(),
+        created_by: CURRENT_USER_ID
+      });
+
+      // Now questions is guaranteed to be an array
+      const questions = (normalizedSurvey.questions as Question[]).map((q: Question) => {
+        return {
           id: q.id,
           text: q.text,
           type: q.type,
           options: q.type !== "text" ? q.options : null
-        }
-        return questionModel
-      })
+        };
+      });
 
       // Create request payload according to backend model
       const requestData = {
@@ -67,30 +76,30 @@ export default function SurveyCreationForm() {
         questions: questions,
         is_anonymous: isAnonymous,
         created_by: CURRENT_USER_ID
-      }
+      };
 
       // Use the survey service to create the survey
-      const result = await createSurvey(requestData)
+      const result = await createSurvey(requestData);
 
       toast({
         title: "Survey created",
         description: `Survey "${title}" has been created successfully.`,
-      })
+      });
 
       // Navigate back to surveys list
-      router.push("/dashboard/surveys")
+      router.push("/dashboard/surveys");
     } catch (error) {
-      console.error("Error creating survey:", error)
+      console.error("Error creating survey:", error);
 
       toast({
         variant: "destructive",
         title: "Failed to create survey",
         description: error instanceof Error ? error.message : "There was an error creating your survey. Please try again.",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-4">
