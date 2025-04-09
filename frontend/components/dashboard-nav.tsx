@@ -26,14 +26,14 @@ const navItems: NavItem[] = [
     icon: FileText,
   },
   {
-    title: "Results",
-    href: "/dashboard/results",
-    icon: BarChart3,
-  },
-  {
     title: "Schedule",
     href: "/dashboard/schedule",
     icon: CalendarDays,
+  },
+  {
+    title: "Results",
+    href: "/dashboard/results",
+    icon: BarChart3,
   },
   {
     title: "Students",

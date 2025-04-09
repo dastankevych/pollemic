@@ -1,7 +1,7 @@
 "use client"
 
 import { formatDate } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback} from "@/components/ui/avatar"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
