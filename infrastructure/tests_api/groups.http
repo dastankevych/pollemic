@@ -1,0 +1,33 @@
+### Variables are defined in http-client.env.json
+@baseUrl = localhost/groups
+
+### List all groups
+GET {{baseUrl}}
+Accept: application/json
+
+### List active groups only
+GET {{baseUrl}}/active
+Accept: application/json
+
+### Get specific group by ID
+GET {{baseUrl}}/-1002215169635
+Accept: application/json
+
+### Test with the group ID shown in your screenshot
+GET {{baseUrl}}/{{GROUP_ID}}
+Accept: application/json
+
+### Create or update group (if the API supports this)
+POST {{baseUrl}}/create_or_update
+Accept: application/json
+Content-Type: application/json
+
+{
+    "group_id": -1002215169635,
+    "title": "test_bot",
+    "is_active": true
+}
+
+### Deactivate a group
+POST {{baseUrl}}/{{GROUP_ID}}/deactivate
+Accept: application/json

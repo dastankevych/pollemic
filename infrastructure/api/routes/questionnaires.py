@@ -297,6 +297,62 @@ async def create_questionnaire_form(
     )
 
 
+@router.get("/assignments")
+async def list_assignments(
+        request: Request,
+        questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo),
+        is_api: bool = Depends(is_api_request)
+):
+    """
+    List all questionnaire assignments
+    """
+    try:
+        assignments = await questionnaire_repo.get_active_assignments()
+
+        if is_api:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "success",
+                    "count": len(assignments),
+                    "assignments": [
+                        {
+                            "id": assignment.id,
+                            "questionnaire_id": assignment.questionnaire_id,
+                            "questionnaire": questionnaire_to_dict(assignment.questionnaire),
+                            "group_id": assignment.group_id,
+                            "group": {
+                                "group_id": assignment.group.group_id,
+                                "title": assignment.group.title,
+                                "is_active": assignment.group.is_active
+                            },
+                            "due_date": assignment.due_date.isoformat(),
+                            "is_active": assignment.is_active,
+                            "recurrence": "Once"  # Default to Once since recurrence isn't in the current model
+                        } for assignment in assignments
+                    ]
+                }
+            )
+
+        return templates.TemplateResponse(
+            "list_assignments.html",
+            {
+                "request": request,
+                "assignments": assignments
+            }
+        )
+    except Exception as e:
+        if is_api:
+            return JSONResponse(
+                status_code=500,
+                content={"status": "error", "message": f"Error listing assignments: {str(e)}"}
+            )
+        return templates.TemplateResponse(
+            "error.html",
+            {"request": request, "error": f"Error listing assignments: {str(e)}"}
+        )
+
+
 @router.post("/")
 async def create_questionnaire(
         request: Request,

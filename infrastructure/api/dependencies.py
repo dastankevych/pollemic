@@ -3,10 +3,11 @@ from fastapi import Header, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram import Bot
 
+from infrastructure.database.repo.base import BaseRepo
 from infrastructure.database.repo.requests import RequestsRepo
 from infrastructure.database.repo.users import UserRepo
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
-from infrastructure.database.repo.base import BaseRepo
+from infrastructure.database.repo.groups import GroupRepo
 from infrastructure.database.setup import create_engine, create_session_pool
 from tgbot.config import load_config
 
@@ -43,6 +44,7 @@ def get_repo_factory(repo_type: Type[RepoT]):
 get_questionnaire_repo = get_repo_factory(QuestionnaireRepo)
 get_user_repo = get_repo_factory(UserRepo)
 get_requests_repo = get_repo_factory(RequestsRepo)
+get_group_repo = get_repo_factory(GroupRepo)
 
 
 async def is_api_request(

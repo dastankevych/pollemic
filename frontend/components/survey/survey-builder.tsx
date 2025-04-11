@@ -1,3 +1,5 @@
+// frontend/components/survey/survey-builder.tsx
+
 "use client"
 
 import React from "react"
@@ -43,7 +45,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
   const questionsContainerRef = useRef<HTMLDivElement>(null)
   const optionsContainerRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
-  // Синхронизируем локальное состояние с пропсами
+  // Sync local state with props
   useEffect(() => {
     setTitle(initialTitle)
   }, [initialTitle])
@@ -52,7 +54,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     setDescription(initialDescription)
   }, [initialDescription])
 
-  // Обработчики изменения заголовка и описания
+  // Handle title and description changes
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value
     setTitle(newTitle)
@@ -69,7 +71,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     }
   }
 
-  // Экспортируем методы для родительского компонента
+  // Export methods for parent component
   useImperativeHandle(ref, () => ({
     getSurveyData: () => ({
       title,
@@ -81,7 +83,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     }),
   }))
 
-  // Добавляем первый вопрос при загрузке
+  // Add first question when component loads
   useEffect(() => {
     if (questions.length === 0) {
       addQuestion()
@@ -110,15 +112,15 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     setQuestions((prev) =>
       prev.map((q) => {
         if (q.id === id) {
-          // Если тип изменился на radio или checkbox и нет опций, добавляем две опции по умолчанию
+          // If type changed to radio or checkbox and no options, add two default options
           let options = q.options
           if ((type === "radio" || type === "checkbox") && q.options.length === 0) {
             const opt1Id = optionCount
             const opt2Id = optionCount + 1
             setOptionCount((prev) => prev + 2)
             options = [
-              { id: opt1Id, text: "Вариант 1" },
-              { id: opt2Id, text: "Вариант 2" },
+              { id: opt1Id, text: "Option 1" },
+              { id: opt2Id, text: "Option 2" },
             ]
           }
           return { ...q, type, options }
@@ -137,7 +139,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
         if (q.id === questionId) {
           return {
             ...q,
-            options: [...q.options, { id: newId, text: `Новый вариант` }],
+            options: [...q.options, { id: newId, text: `New Option` }],
           }
         }
         return q
@@ -177,7 +179,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     setQuestions((prev) => prev.filter((q) => q.id !== id))
   }
 
-  // Обработчики для drag-and-drop вопросов
+  // Question drag-and-drop handlers
   const handleQuestionDragStart = (e: React.DragEvent, questionId: number) => {
     setDraggedQuestionId(questionId)
     e.currentTarget.classList.add("opacity-50")
@@ -199,20 +201,20 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     const questionElements = Array.from(container.querySelectorAll(".question-item"))
     const dragIndex = questions.findIndex((q) => q.id === draggedQuestionId)
 
-    // Находим индекс, куда будет вставлен элемент
+    // Find index where element will be inserted
     let dropIndex = questionElements.findIndex((el) => {
       const rect = el.getBoundingClientRect()
       return e.clientY < rect.top + rect.height / 2
     })
 
-    // Корректируем индекс, если перетаскиваемый элемент находится выше целевого
+    // Adjust index if dragged element is above target
     if (dropIndex === -1) {
       dropIndex = questions.length
     } else if (dragIndex < dropIndex) {
       dropIndex--
     }
 
-    // Не обновляем, если индекс не изменился
+    // Don't update if index didn't change
     if (dropIndex === dragIndex) {
       setDropQuestionIndex(null)
     } else {
@@ -227,7 +229,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     const dragIndex = questions.findIndex((q) => q.id === draggedQuestionId)
     if (dragIndex === -1) return
 
-    // Создаем новый массив вопросов с обновленным порядком
+    // Create new questions array with updated order
     const newQuestions = [...questions]
     const [draggedQuestion] = newQuestions.splice(dragIndex, 1)
     newQuestions.splice(dropQuestionIndex, 0, draggedQuestion)
@@ -236,11 +238,11 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     setDropQuestionIndex(null)
   }
 
-  // Обработчики для drag-and-drop опций
+  // Option drag-and-drop handlers
   const handleOptionDragStart = (e: React.DragEvent, questionId: number, optionId: number) => {
     setDraggedOptionInfo({ questionId, optionId })
     e.currentTarget.classList.add("opacity-50")
-    // Предотвращаем всплытие события, чтобы не активировать drag-and-drop вопросов
+    // Prevent event bubbling to avoid triggering question drag
     e.stopPropagation()
   }
 
@@ -265,20 +267,20 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     const optionElements = Array.from(optionsContainer.querySelectorAll(".option-item"))
     const dragIndex = question.options.findIndex((o) => o.id === draggedOptionInfo.optionId)
 
-    // Находим индекс, куда будет вставлен элемент
+    // Find index where element will be inserted
     let dropIndex = optionElements.findIndex((el) => {
       const rect = el.getBoundingClientRect()
       return e.clientY < rect.top + rect.height / 2
     })
 
-    // Корректируем индекс, если перетаскиваемый элемент находится выше целевого
+    // Adjust index if dragged element is above target
     if (dropIndex === -1) {
       dropIndex = question.options.length
     } else if (dragIndex < dropIndex) {
       dropIndex--
     }
 
-    // Не обновляем, если индекс не изменился
+    // Don't update if index didn't change
     if (dropIndex === dragIndex) {
       setDropOptionIndex(null)
     } else {
@@ -297,28 +299,28 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
     const dragIndex = question.options.findIndex((o) => o.id === draggedOptionInfo.optionId)
     if (dragIndex === -1) return
 
-    // Создаем новый массив опций с обновленным порядком
+    // Create new options array with updated order
     const newOptions = [...question.options]
     const [draggedOption] = newOptions.splice(dragIndex, 1)
     newOptions.splice(dropOptionIndex.index, 0, draggedOption)
 
-    // Обновляем состояние с новым порядком опций
+    // Update state with new options order
     setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, options: newOptions } : q)))
 
     setDropOptionIndex(null)
   }
 
-  // Функция для сохранения ссылки на контейнер опций
+  // Store reference to options container
   const setOptionsContainerRef = (questionId: number, ref: HTMLDivElement | null) => {
     optionsContainerRefs.current[questionId] = ref
   }
 
-  // Функция для определения, нужно ли показывать индикатор вставки для вопроса
+  // Check if drop indicator should be shown for question
   const shouldShowQuestionDropIndicator = (index: number) => {
     return dropQuestionIndex === index && draggedQuestionId !== null
   }
 
-  // Функция для определения, нужно ли показывать индикатор вставки для опции
+  // Check if drop indicator should be shown for option
   const shouldShowOptionDropIndicator = (questionId: number, index: number) => {
     return dropOptionIndex?.questionId === questionId && dropOptionIndex?.index === index && draggedOptionInfo !== null
   }
@@ -350,7 +352,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
               </div>
               <Input
                 className="flex-1 text-lg font-medium border-none focus-visible:ring-0 p-0 placeholder:text-muted-foreground/50"
-                placeholder="Текст вопроса"
+                placeholder="Question text"
                 value={question.text}
                 onChange={(e) => updateQuestionText(question.id, e.target.value)}
               />
@@ -359,12 +361,12 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
                 onValueChange={(value: "text" | "radio" | "checkbox") => updateQuestionType(question.id, value)}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Тип вопроса" />
+                  <SelectValue placeholder="Question type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="text">Текст</SelectItem>
-                  <SelectItem value="radio">Один вариант</SelectItem>
-                  <SelectItem value="checkbox">Несколько вариантов</SelectItem>
+                  <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="radio">Single choice</SelectItem>
+                  <SelectItem value="checkbox">Multiple choice</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -416,7 +418,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
                         </div>
                         <Input
                           className="flex-1 border-none focus-visible:ring-0 p-0 placeholder:text-muted-foreground/50"
-                          placeholder="Вариант ответа"
+                          placeholder="Answer option"
                           value={option.text}
                           onChange={(e) => updateOptionText(question.id, option.id, e.target.value)}
                         />
@@ -440,7 +442,7 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
                 <div className="pl-8 mt-2">
                   <Button variant="ghost" size="sm" onClick={() => addOption(question.id)} className="text-primary">
                     <PlusCircle size={16} className="mr-2" />
-                    Добавить вариант
+                    Add option
                   </Button>
                 </div>
               </>
@@ -455,11 +457,10 @@ export const SurveyBuilder = forwardRef<any, SurveyBuilderProps>((props, ref) =>
 
       <Button variant="outline" onClick={addQuestion} className="w-full py-6">
         <PlusCircle size={18} className="mr-2" />
-        Добавить вопрос
+        Add question
       </Button>
     </div>
   )
 })
 
 SurveyBuilder.displayName = "SurveyBuilder"
-
