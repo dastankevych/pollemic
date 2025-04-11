@@ -20,6 +20,7 @@ export default function SchedulePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [groups, setGroups] = useState<Group[]>([])
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { toast } = useToast()
 
   useEffect(() => {
@@ -72,22 +73,28 @@ export default function SchedulePage() {
       return
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Prepare the due date in ISO format
-      const dueDate = new Date(date)
+      const dueDate = new Date(date);
       // Set time to end of day (23:59:59)
-      dueDate.setHours(23, 59, 59)
+      dueDate.setHours(23, 59, 59);
 
-      const questionnaireId = parseInt(selectedSurvey)
-      const groupId = parseInt(selectedGroup)
+      // Remove the timezone information from the ISO string
+      // This will create a timezone-naive datetime string
+      const dueDateString = dueDate.toISOString().replace('Z', '');
+
+      const questionnaireId = parseInt(selectedSurvey);
+      const groupId = parseInt(selectedGroup);
 
       // Create the assignment
       await assignQuestionnaire(questionnaireId, {
         group_id: groupId,
-        due_date: dueDate.toISOString()
-      })
+        due_date: dueDateString
+      });
+
+      setRefreshTrigger(prev => prev + 1);
 
       toast({
         title: "Survey scheduled",
@@ -206,7 +213,7 @@ export default function SchedulePage() {
           <CardDescription>View and manage your scheduled surveys</CardDescription>
         </CardHeader>
         <CardContent>
-          <ScheduleList />
+          <ScheduleList refreshTrigger={refreshTrigger} />
         </CardContent>
       </Card>
     </div>

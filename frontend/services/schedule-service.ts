@@ -110,13 +110,10 @@ export async function assignQuestionnaire(
   }
 }
 
-/**
- * Gets all scheduled questionnaires (assignments)
- * @returns A promise that resolves to the list of scheduled surveys
- */
+
 export async function getScheduledSurveys(): Promise<ScheduledSurvey[]> {
   try {
-    const response = await fetch('/api/questionnaires/assignments', {
+    const response = await fetch('/questionnaires/assignments', {
       headers: {
         'Accept': 'application/json'
       }
@@ -128,12 +125,13 @@ export async function getScheduledSurveys(): Promise<ScheduledSurvey[]> {
     }
 
     const data = await response.json();
+    console.log("Assignments API response:", data); // Add this for debugging
 
     // Transform API data to match the format expected by the UI
     const scheduledSurveys = data.assignments.map((assignment: any) => ({
       id: assignment.id.toString(),
       name: assignment.questionnaire.title,
-      date: new Date(assignment.due_date).toISOString().split('T')[0],
+      date: new Date(assignment.due_date).toLocaleDateString(),
       recurrence: assignment.recurrence || 'Once',
       target: assignment.group.title,
       status: assignment.is_active ? 'Scheduled' : 'Sent'
@@ -142,8 +140,7 @@ export async function getScheduledSurveys(): Promise<ScheduledSurvey[]> {
     return scheduledSurveys;
   } catch (error) {
     console.error('Error in getScheduledSurveys service:', error);
-
-    // Return empty array in case of error to avoid breaking the UI
+    // Still return empty array in case of error to avoid breaking the UI
     return [];
   }
 }

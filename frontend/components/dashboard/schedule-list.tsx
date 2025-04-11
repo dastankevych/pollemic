@@ -8,30 +8,30 @@ import { Edit, Trash } from "lucide-react"
 import { getScheduledSurveys, ScheduledSurvey } from "@/services/schedule-service"
 import { useToast } from "@/hooks/use-toast"
 
-export function ScheduleList() {
-  const [surveys, setSurveys] = useState<ScheduledSurvey[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
+export function ScheduleList({ refreshTrigger = 0 }) {
+  const [surveys, setSurveys] = useState<ScheduledSurvey[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchScheduledSurveys() {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const data = await getScheduledSurveys()
-        setSurveys(data)
+        const data = await getScheduledSurveys();
+        setSurveys(data);
       } catch (error) {
         toast({
           variant: "destructive",
           title: "Failed to load scheduled surveys",
           description: "There was an error loading your scheduled surveys."
-        })
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchScheduledSurveys()
-  }, [toast])
+    fetchScheduledSurveys();
+  }, [toast, refreshTrigger]);
 
   if (isLoading) {
     return (

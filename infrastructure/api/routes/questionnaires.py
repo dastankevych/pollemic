@@ -184,7 +184,7 @@ async def assign_questionnaire(
             group_id=assignment.group_id,
             due_date=assignment.due_date,
             bot=get_bot(),
-            bot_username="cyprus_university_bot"
+            bot_username="vinylonbot"
         )
 
         if is_api:

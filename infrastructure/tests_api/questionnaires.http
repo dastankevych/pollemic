@@ -27,11 +27,11 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "title": "Student Satisfaction Survey!!!",
-    "description": "!!Survey about student satisfaction with university services",
+    "title": "Student Satisfaction Survey",
+    "description": "Survey about student satisfaction with university services",
     "questions": [
         {
-            "text": "!!!How satisfied ardsadsae you with the quality of teaching?",
+            "text": "How satisfied you with the quality of teaching?",
             "type": "single_choice",
             "options": [
                 "Very satisfied",
