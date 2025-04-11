@@ -18,18 +18,8 @@ export default function SchedulePage() {
     <div className="flex flex-col gap-4">
       <DashboardHeader heading="Schedule Surveys" text="Plan and schedule your surveys for automatic distribution." />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Calendar</CardTitle>
-            <CardDescription>Select dates to schedule surveys</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-1">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-[1fr,auto]">
+        <Card>
           <CardHeader>
             <CardTitle>Schedule New Survey</CardTitle>
             <CardDescription>Configure survey distribution settings</CardDescription>
@@ -85,6 +75,16 @@ export default function SchedulePage() {
             <Button className="w-full mt-4">Schedule Survey</Button>
           </CardContent>
         </Card>
+
+        <Card className="w-fit">
+          <CardHeader>
+            <CardTitle>Calendar</CardTitle>
+            <CardDescription>Select dates to schedule surveys</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -99,4 +99,3 @@ export default function SchedulePage() {
     </div>
   )
 }
-

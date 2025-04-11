@@ -6,7 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { BarChart3, CalendarDays, FileText, Home, Settings, Users } from "lucide-react"
+import { BarChart3, CalendarDays, FileText, Home, Settings, Users } from 'lucide-react'
 
 interface NavItem {
   title: string
@@ -51,19 +51,20 @@ export function DashboardNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="grid items-start gap-2 py-4">
+    <nav className="grid items-start gap-2 py-4 px-4">
       {navItems.map((item) => (
         <Link key={item.href} href={item.href}>
           <Button
             variant={pathname === item.href ? "secondary" : "ghost"}
             className={cn("w-full justify-start", pathname === item.href && "bg-muted font-medium")}
           >
-            <item.icon className="mr-2 h-4 w-4" />
-            {item.title}
+            <div className="w-6 flex justify-center">
+              <item.icon className="h-4 w-4" />
+            </div>
+            <span className="ml-2">{item.title}</span>
           </Button>
         </Link>
       ))}
     </nav>
   )
 }
-
