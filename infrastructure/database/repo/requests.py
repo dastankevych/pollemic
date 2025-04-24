@@ -2,11 +2,14 @@ from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.database.repo.users import UserRepo
-from infrastructure.database.repo.questionnaires import QuestionnaireRepo
 from infrastructure.database.setup import create_engine
+
+from infrastructure.database.repo.users import UserRepo
+from infrastructure.database.repo.user_profiles import StudentProfileRepo, MentorProfileRepo, AdminProfileRepo
 from infrastructure.database.repo.groups import GroupRepo
-from infrastructure.database.repo.schedule import ScheduleRepo
+from infrastructure.database.repo.questionnaires import QuestionnaireRepo
+from infrastructure.database.repo.assignments import AssignmentsRepo
+from infrastructure.database.repo.responses import ResponseRepo
 
 
 @dataclass
@@ -25,6 +28,21 @@ class RequestsRepo:
         return UserRepo(self.session)
 
     @property
+    def student_profiles(self) -> StudentProfileRepo:
+        """Student profile repository for student profile operations."""
+        return StudentProfileRepo(self.session)
+    
+    @property
+    def mentor_profiles(self) -> MentorProfileRepo:
+        """Mentor profile repository for mentor profile operations."""
+        return MentorProfileRepo(self.session)
+    
+    @property
+    def admin_profiles(self) -> AdminProfileRepo:
+        """Admin profile repository for admin profile operations."""
+        return AdminProfileRepo(self.session)
+    
+    @property
     def questionnaires(self) -> QuestionnaireRepo:
         """Questionnaire repository for questionnaire operations."""
         return QuestionnaireRepo(self.session)
@@ -35,9 +53,15 @@ class RequestsRepo:
         return GroupRepo(self.session)
     
     @property
-    def schedule(self):
-        """Schedule repository for schedule operations."""
-        return ScheduleRepo(self.session)
+    def assignments(self) -> AssignmentsRepo:
+        """Assignment repository for assignment operations."""
+        return QuestionnaireRepo(self.session)
+    
+    @property
+    def responses(self) -> ResponseRepo:
+        """Response repository for response operations."""
+        return ResponseRepo(self.session)
+    
 
 
 if __name__ == "__main__":
@@ -61,6 +85,5 @@ if __name__ == "__main__":
             user = await repo.users.get_or_create_user(
                 user_id=12356,
                 full_name="John Doe",
-                language="en",
                 username="johndoe",
             )

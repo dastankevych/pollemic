@@ -12,7 +12,6 @@ class UserRepo(BaseRepo):
         self,
         user_id: int,
         full_name: str,
-        language: str,
         username: Optional[str] = None,
         role: UserRole = UserRole.STUDENT,
     ) -> User:
@@ -25,7 +24,6 @@ class UserRepo(BaseRepo):
                 user_id=user_id,
                 username=username,
                 full_name=full_name,
-                language=language,
                 role=role,
             )
             .on_conflict_do_update(

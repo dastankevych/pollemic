@@ -226,7 +226,7 @@ class QuestionnaireRepo(BaseRepo):
         """Get latest questionnaires with limit"""
         query = (
             select(Questionnaire)
-            .order_by(desc(Questionnaire.created_at))
+            .order_by(desc(Questionnaire.updated_at))
             .limit(limit)
         )
         result = await self.session.execute(query)

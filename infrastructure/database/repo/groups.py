@@ -3,7 +3,6 @@ from sqlalchemy import select, update
 from infrastructure.database.models import Group
 from .base import BaseRepo
 
-
 class GroupRepo(BaseRepo):
     async def get_group(self, group_id: int) -> Optional[Group]:
         """Get group by ID"""
@@ -11,16 +10,9 @@ class GroupRepo(BaseRepo):
 
     async def create_or_update_group(
             self,
-            group_id: int,
-            title: str,
-            is_active: bool = True
+            group: Group,
     ) -> Group:
         """Create new group or update existing one"""
-        group = Group(
-            group_id=group_id,
-            title=title,
-            is_active=is_active
-        )
         await self.session.merge(group)
         await self.session.commit()
         return group
