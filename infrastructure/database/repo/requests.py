@@ -6,6 +6,7 @@ from infrastructure.database.repo.users import UserRepo
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
 from infrastructure.database.setup import create_engine
 from infrastructure.database.repo.groups import GroupRepo
+from infrastructure.database.repo.schedule import ScheduleRepo
 
 
 @dataclass
@@ -20,9 +21,7 @@ class RequestsRepo:
 
     @property
     def users(self) -> UserRepo:
-        """
-        The User repository sessions are required to manage user operations.
-        """
+        """The User repository sessions are required to manage user operations."""
         return UserRepo(self.session)
 
     @property
@@ -34,6 +33,11 @@ class RequestsRepo:
     def groups(self) -> GroupRepo:
         """Group repository for group operations"""
         return GroupRepo(self.session)
+    
+    @property
+    def schedule(self):
+        """Schedule repository for schedule operations."""
+        return ScheduleRepo(self.session)
 
 
 if __name__ == "__main__":

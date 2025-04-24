@@ -11,12 +11,11 @@ from infrastructure.database.models.base import Base
 # Import all models to register them with SQLAlchemy
 from infrastructure.database.models.users import User
 from infrastructure.database.models.user_profiles import StudentProfile, MentorProfile, AdminProfile
-from infrastructure.database.models.questionnaires import (
-    Group,
-    Questionnaire,
-    QuestionnaireAssignment,
-    QuestionnaireResponse
-)
+from infrastructure.database.models.questionnaires import Questionnaire
+from infrastructure.database.models.responses import Response
+from infrastructure.database.models.assignments import Assignment
+from infrastructure.database.models.groups import Group
+from infrastructure.database.models.schedules import Schedule
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -6,8 +6,8 @@ from sqlalchemy.orm import joinedload
 
 from infrastructure.database.models import (
     Questionnaire,
-    QuestionnaireAssignment,
-    QuestionnaireResponse,
+    Assignment,
+    Response,
     User,
     Group
 )
@@ -25,7 +25,6 @@ class QuestionnaireRepo(BaseRepo):
             questions: dict,
             created_by: int,
             is_anonymous: bool = False,
-            due_date: Optional[datetime] = None,
     ) -> Questionnaire:
         """
         Create a new questionnaire
@@ -64,7 +63,7 @@ class QuestionnaireRepo(BaseRepo):
             due_date: datetime,
             bot: str = None,
             bot_username: str = None
-    ) -> QuestionnaireAssignment:
+    ) -> Assignment:
         """
         Assign questionnaire to a group and notify the group.
 
@@ -76,7 +75,7 @@ class QuestionnaireRepo(BaseRepo):
             bot_username: Bot's username for deep link creation.
 
         Returns:
-            The created QuestionnaireAssignment object.
+            The created Assignment object.
         """
         # Step 1: Check if the group is active
         group = await self.session.get(Group, group_id)
@@ -86,7 +85,7 @@ class QuestionnaireRepo(BaseRepo):
             raise ValueError(f"Group with ID {group_id} is inactive and cannot be assigned to")
 
         # Step 2: Assign the questionnaire
-        assignment = QuestionnaireAssignment(
+        assignment = Assignment(
             questionnaire_id=questionnaire_id,
             group_id=group_id,
             due_date=due_date,
@@ -107,15 +106,15 @@ class QuestionnaireRepo(BaseRepo):
     async def get_active_assignments_for_group(
             self,
             group_id: int,
-    ) -> List[QuestionnaireAssignment]:
+    ) -> List[Assignment]:
         """Get active assignments for specific group"""
         query = (
-            select(QuestionnaireAssignment)
+            select(Assignment)
             .where(
-                QuestionnaireAssignment.group_id == group_id,
-                QuestionnaireAssignment.is_active == True,
+                Assignment.group_id == group_id,
+                Assignment.is_active == True,
             )
-            .options(joinedload(QuestionnaireAssignment.questionnaire))
+            .options(joinedload(Assignment.questionnaire))
         )
         result = await self.session.execute(query)
         return result.scalars().all()
@@ -125,9 +124,9 @@ class QuestionnaireRepo(BaseRepo):
             assignment_id: int,
             student_id: int,
             answers: dict,
-    ) -> QuestionnaireResponse:
+    ) -> Response:
         """Submit response to questionnaire"""
-        response = QuestionnaireResponse(
+        response = Response(
             assignment_id=assignment_id,
             student_id=student_id,
             answers=answers,
@@ -137,27 +136,27 @@ class QuestionnaireRepo(BaseRepo):
         await self.session.commit()
         return response
 
-    async def get_active_assignments(self) -> List[QuestionnaireAssignment]:
+    async def get_active_assignments(self) -> List[Assignment]:
         """Get all active questionnaire assignments"""
         query = (
-            select(QuestionnaireAssignment)
-            .where(QuestionnaireAssignment.is_active == True)
+            select(Assignment)
+            .where(Assignment.is_active == True)
             .options(
-                joinedload(QuestionnaireAssignment.questionnaire),
-                joinedload(QuestionnaireAssignment.group)
+                joinedload(Assignment.questionnaire),
+                joinedload(Assignment.group)
             )
         )
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_assignment(self, assignment_id: int) -> Optional[QuestionnaireAssignment]:
+    async def get_assignment(self, assignment_id: int) -> Optional[Assignment]:
         """Get questionnaire assignment by ID"""
         query = (
-            select(QuestionnaireAssignment)
-            .where(QuestionnaireAssignment.id == assignment_id)
+            select(Assignment)
+            .where(Assignment.id == assignment_id)
             .options(
-                joinedload(QuestionnaireAssignment.questionnaire),
-                joinedload(QuestionnaireAssignment.group)
+                joinedload(Assignment.questionnaire),
+                joinedload(Assignment.group)
             )
         )
         result = await self.session.execute(query)
@@ -166,8 +165,8 @@ class QuestionnaireRepo(BaseRepo):
     async def close_assignment(self, assignment_id: int) -> None:
         """Close a questionnaire assignment"""
         query = (
-            update(QuestionnaireAssignment)
-            .where(QuestionnaireAssignment.id == assignment_id)
+            update(Assignment)
+            .where(Assignment.id == assignment_id)
             .values(is_active=False)
         )
         await self.session.execute(query)

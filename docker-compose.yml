@@ -81,6 +81,8 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://api:8000
+    volumes:
+      - frontend_node_modules:/app/node_modules 
 
   reverse-proxy:
    container_name: nginx-reverse-proxy
@@ -96,3 +98,4 @@ services:
 volumes:
  pgdata: { }
  cache: { }
+ frontend_node_modules: {}

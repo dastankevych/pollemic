@@ -1,12 +1,14 @@
-from typing import Annotated, TypeVar, Type
+from typing import Annotated, TypeVar, Type, AsyncGenerator
+
 from fastapi import Header, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram import Bot
 
 from infrastructure.database.repo.base import BaseRepo
 from infrastructure.database.repo.requests import RequestsRepo
-from infrastructure.database.repo.users import UserRepo
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
+from infrastructure.database.repo.users import UserRepo
+from infrastructure.database.repo.schedule import ScheduleRepo
 from infrastructure.database.repo.groups import GroupRepo
 from infrastructure.database.setup import create_engine, create_session_pool
 from tgbot.config import load_config
@@ -25,7 +27,7 @@ def get_bot():
     return bot
 
 
-async def get_session() -> AsyncSession:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Get database session"""
     async with session_pool() as session:
         yield session
@@ -45,6 +47,7 @@ get_questionnaire_repo = get_repo_factory(QuestionnaireRepo)
 get_user_repo = get_repo_factory(UserRepo)
 get_requests_repo = get_repo_factory(RequestsRepo)
 get_group_repo = get_repo_factory(GroupRepo)
+get_schedule_repo = get_repo_factory(ScheduleRepo)
 
 
 async def is_api_request(
