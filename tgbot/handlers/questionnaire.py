@@ -6,7 +6,7 @@ from infrastructure.database.repo.users import UserRepo
 from tgbot.keyboards.inline import (
     get_questionnaire_button, get_done_button,
     get_questionnaires_keyboard, get_groups_keyboard,
-    get_confirm_cancel_assignment_keyboard,
+    get_confirm_cancel_keyboard,
     get_active_assignments_keyboard, get_confirm_cancel_close_keyboard
 )
 from aiogram.fsm.state import State, StatesGroup
@@ -258,7 +258,7 @@ async def confirm_assignment(callback: CallbackQuery, state: FSMContext, repo: U
     await state.update_data(selected_group_id=group_id)
     await callback.message.edit_text(
         confirmation_text,
-        reply_markup=get_confirm_cancel_assignment_keyboard()
+        reply_markup=get_confirm_cancel_keyboard()
     )
 
 

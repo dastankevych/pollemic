@@ -77,9 +77,9 @@ WEBHOOK_APP_NAME=webhook
 
 2. Go to the `docker-compose.yml` file and uncomment the sections: `api`, `pg_database` and `volumes` to get started.
 
-3. Now we can restart Docker with new containers using the command:
+3. If you don't have any migrations generate it by command:
 
-    `docker-compose exec api alembic upgrade head`
+    `docker-compose exec api alembic revision --autogenerate -m "Initial migration"`
 
 4. Everything is ready! Now we can perform the migration!
 Open terminal and enter the following command:

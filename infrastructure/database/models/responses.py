@@ -20,7 +20,7 @@ class Response(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     assignment_id: Mapped[int] = mapped_column(ForeignKey("assignments.id"))
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     answers: Mapped[dict] = mapped_column(JSON)
     is_completed: Mapped[bool] = mapped_column(default=False)
 

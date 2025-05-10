@@ -19,7 +19,7 @@ class User(Base, TimestampMixin, TableNameMixin):
     This class represents a User in the application with different roles.
 
     Attributes:
-        user_id (Mapped[int]): The unique identifier of the user.
+        id (Mapped[int]): The unique identifier of the user.
         username (Mapped[Optional[str]]): The username of the user.
         full_name (Mapped[str]): The full name of the user.
         active (Mapped[bool]): Indicates whether the user is active or not.
@@ -35,7 +35,7 @@ class User(Base, TimestampMixin, TableNameMixin):
         can_view_anonymous_data(): Returns True if user can view anonymous data
         can_view_full_data(): Returns True if user can view full data
     """
-    user_id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=False)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=False)
     username: Mapped[Optional[str]] = mapped_column(String(128))
     full_name: Mapped[str] = mapped_column(String(128))
     active: Mapped[bool] = mapped_column(Boolean, server_default=true())
@@ -48,7 +48,7 @@ class User(Base, TimestampMixin, TableNameMixin):
     department: Mapped[Optional[str]] = mapped_column(String(100))
 
     def __repr__(self):
-        return f"<User {self.user_id} {self.username} {self.full_name} ({self.role})>"
+        return f"<User {self.id} {self.username} {self.full_name} ({self.role})>"
 
     def is_student(self) -> bool:
         return self.role == UserRole.STUDENT

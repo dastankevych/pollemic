@@ -9,7 +9,6 @@ from sqlalchemy.dialects.postgresql import TIMESTAMP
 from .base import Base, TimestampMixin
 from .questionnaires import Questionnaire
 from .groups import Group
-from .schedules import Schedule
 from .users import User
 
 class Assignment(Base, TimestampMixin):
@@ -36,9 +35,8 @@ class Assignment(Base, TimestampMixin):
     start_time: Mapped[datetime] = mapped_column(TIMESTAMP)
     deadline_time: Mapped[datetime] = mapped_column(TIMESTAMP)
     
-    created_by: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     questionnaire: Mapped["Questionnaire"] = relationship("Questionnaire")
     target_group: Mapped["Group"] = relationship("Group")
-    schedule: Mapped["Schedule"] = relationship("Schedule")
     creator: Mapped["User"] = relationship("User")

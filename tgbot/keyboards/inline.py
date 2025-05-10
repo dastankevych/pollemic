@@ -98,7 +98,7 @@ def get_groups_keyboard(groups: list) -> InlineKeyboardMarkup:
     )
 
 
-def get_confirm_cancel_assignment_keyboard() -> InlineKeyboardMarkup:
+def get_confirm_cancel_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [

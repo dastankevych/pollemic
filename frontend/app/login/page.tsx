@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
+import { login } from "@/services/auth-service"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -23,26 +24,30 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, this would be an API call to authenticate
-      // For demo purposes, we'll simulate a successful login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Call the auth service to log in
+      const response = await login({
+        username,
+        password
+      })
 
-      // Simulate role-based redirection
-      if (email.includes("admin")) {
+      // Show success message
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${response.user?.full_name}!`,
+      })
+
+      // Redirect based on user role
+      if (response.user?.role === "university_admin") {
         router.push("/admin/dashboard")
       } else {
         router.push("/dashboard")
       }
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Pollemic!",
-      })
     } catch (error) {
+      // Show error message
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error instanceof Error ? error.message : "Please check your credentials and try again.",
       })
     } finally {
       setIsLoading(false)
@@ -50,55 +55,60 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login to Pollemic</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline">
-                  Forgot password?
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold">Login to Pollemic</CardTitle>
+            <CardDescription>Enter your Telegram username and password to access your account</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Telegram Username</Label>
+                <Input
+                    id="username"
+                    type="text"
+                    placeholder="Username without @ symbol"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use <strong>admin</strong> for admin access or <strong>mentor1</strong>/<strong>mentor2</strong> for mentor access
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <p className="text-xs text-muted-foreground">
+                  For testing, use <strong>admin123</strong> or <strong>mentor123</strong> respectively
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+              <div className="text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/contact" className="text-primary underline-offset-4 hover:underline">
+                  Contact administrator
                 </Link>
               </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
-            </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link href="/contact" className="text-primary underline-offset-4 hover:underline">
-                Contact administrator
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
   )
 }
-

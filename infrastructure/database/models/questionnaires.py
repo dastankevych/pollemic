@@ -23,7 +23,7 @@ class Questionnaire(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str] = mapped_column(String(1000))
     questions: Mapped[dict] = mapped_column(JSON)
-    created_by: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"))
+    created_by: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
     is_anonymous: Mapped[bool] = mapped_column(default=False)
 
     creator: Mapped["User"] = relationship("User")

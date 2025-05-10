@@ -8,7 +8,7 @@ from infrastructure.database.repo.users import UserRepo
 from infrastructure.database.repo.user_profiles import StudentProfileRepo, MentorProfileRepo, AdminProfileRepo
 from infrastructure.database.repo.groups import GroupRepo
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
-from infrastructure.database.repo.assignments import AssignmentsRepo
+from infrastructure.database.repo.assignments import AssignmentRepo
 from infrastructure.database.repo.responses import ResponseRepo
 
 
@@ -53,9 +53,9 @@ class RequestsRepo:
         return GroupRepo(self.session)
     
     @property
-    def assignments(self) -> AssignmentsRepo:
+    def assignments(self) -> AssignmentRepo:
         """Assignment repository for assignment operations."""
-        return QuestionnaireRepo(self.session)
+        return AssignmentRepo(self.session)
     
     @property
     def responses(self) -> ResponseRepo:

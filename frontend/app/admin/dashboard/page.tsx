@@ -1,161 +1,129 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AdminHeader } from "@/components/admin/admin-header"
-import { AdminOverview } from "@/components/admin/admin-overview"
-import { UserManagement } from "@/components/admin/user-management"
-import { SystemSettings } from "@/components/admin/system-settings"
+import { useAuth } from "@/components/auth-provider"
+import { BarChart, Users, FileText, Calendar } from "lucide-react"
 
 export default function AdminDashboardPage() {
+  const { user } = useAuth()
+
   return (
-    <div className="flex flex-col gap-4">
-      <AdminHeader heading="Admin Dashboard" text="Manage users, templates, and system settings." />
-
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="settings">System Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">42</div>
-                <p className="text-xs text-muted-foreground">+3 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Surveys</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">24</div>
-                <p className="text-xs text-muted-foreground">+12 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Templates</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">16</div>
-                <p className="text-xs text-muted-foreground">+2 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">System Health</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">100%</div>
-                <p className="text-xs text-muted-foreground">All systems operational</p>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader>
-              <CardTitle>System Overview</CardTitle>
-              <CardDescription>System usage and performance metrics</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Surveys
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <AdminOverview />
+              <div className="text-2xl font-bold">24</div>
+              <p className="text-xs text-muted-foreground">
+                +2 added this week
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
-              <CardDescription>Add, edit, and manage user accounts</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Scheduled
+              </CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <UserManagement />
+              <div className="text-2xl font-bold">8</div>
+              <p className="text-xs text-muted-foreground">
+                3 due this week
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="templates" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Survey Templates</CardTitle>
-              <CardDescription>Manage and organize survey templates</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center text-muted-foreground">
-              Template management interface will be displayed here
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Settings</CardTitle>
-              <CardDescription>Configure system-wide settings and preferences</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Users
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <SystemSettings />
+              <div className="text-2xl font-bold">126</div>
+              <p className="text-xs text-muted-foreground">
+                +7% from last month
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Response Rate
+              </CardTitle>
+              <BarChart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">68%</div>
+              <p className="text-xs text-muted-foreground">
+                +5% from last week
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Welcome, {user?.full_name}</CardTitle>
+                <CardDescription>
+                  You have full administrator access to the Pollemic system.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <p>As an administrator, you can:</p>
+                <ul className="list-disc pl-6 pt-2 space-y-2">
+                  <li>Create and manage surveys</li>
+                  <li>Schedule surveys for distribution</li>
+                  <li>View all survey responses</li>
+                  <li>Manage user accounts</li>
+                  <li>Configure system settings</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="analytics" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics</CardTitle>
+                <CardDescription>
+                  View detailed analytics for surveys and responses
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <p>Analytics dashboard is under construction.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="reports" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Reports</CardTitle>
+                <CardDescription>
+                  Download and export survey data
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <p>Reporting features are under construction.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
   )
 }
-

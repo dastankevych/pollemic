@@ -8,14 +8,14 @@ class Group(Base, TimestampMixin):
     Represents a Telegram group or channel
     
     Attributes:
-        group_id: Telegram group/channel ID
+        id: Telegram group/channel ID
         title: Group/channel title
         type: Type of chat (group/supergroup/channel)
         is_active: Whether the group is active
     """
     __tablename__ = "groups"
 
-    group_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     type: Mapped[str] = mapped_column(String(20))
     is_active: Mapped[bool] = mapped_column(default=True)
