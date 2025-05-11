@@ -32,12 +32,3 @@ class ResponseRepo(BaseRepo):
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
-
-    async def get_assignment_responses(self, assignment_id: int) -> List[Response]:
-        """Get all responses for a specific assignment"""
-        query = (
-            select(Response)
-            .where(Response.assignment_id == assignment_id)
-        )
-        result = await self.session.execute(query)
-        return result.scalars().all()

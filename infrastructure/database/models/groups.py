@@ -1,7 +1,9 @@
 from sqlalchemy import String, BigInteger
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin
+from .user_profiles import StudentProfile, MentorProfile, AdminProfile
+from .assignments import Assignment
 
 class Group(Base, TimestampMixin):
     """
@@ -10,12 +12,13 @@ class Group(Base, TimestampMixin):
     Attributes:
         id: Telegram group/channel ID
         title: Group/channel title
-        type: Type of chat (group/supergroup/channel)
         is_active: Whether the group is active
     """
-    __tablename__ = "groups"
-
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
-    type: Mapped[str] = mapped_column(String(20))
     is_active: Mapped[bool] = mapped_column(default=True)
+
+    # Relationships
+    assignments: Mapped[list["Assignment"]] = relationship(
+        "Assignment", back_populates="target_group", cascade="all, delete-orphan"
+    )

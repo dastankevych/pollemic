@@ -17,8 +17,6 @@ class Questionnaire(Base, TimestampMixin):
         is_anonymous: Whether responses should be anonymous
         schedules: Schedules for this questionnaire
     """
-    __tablename__ = "questionnaires"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str] = mapped_column(String(1000))

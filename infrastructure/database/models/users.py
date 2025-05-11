@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from sqlalchemy import String, Enum as SQLEnum
-from sqlalchemy import text, BIGINT, Boolean, true
+from sqlalchemy import BIGINT, Boolean, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, TimestampMixin, TableNameMixin
@@ -20,7 +20,7 @@ class User(Base, TimestampMixin, TableNameMixin):
 
     Attributes:
         id (Mapped[int]): The unique identifier of the user.
-        username (Mapped[Optional[str]]): The username of the user.
+        username (Mapped[Optional[str]]): The telegram username of the user.
         full_name (Mapped[str]): The full name of the user.
         active (Mapped[bool]): Indicates whether the user is active or not.
         language (Mapped[str]): The language preference of the user.
@@ -39,13 +39,10 @@ class User(Base, TimestampMixin, TableNameMixin):
     username: Mapped[Optional[str]] = mapped_column(String(128))
     full_name: Mapped[str] = mapped_column(String(128))
     active: Mapped[bool] = mapped_column(Boolean, server_default=true())
-    language: Mapped[str] = mapped_column(String(10), server_default=text("'en'"))
     role: Mapped[UserRole] = mapped_column(
         SQLEnum(UserRole, name="user_role_enum", create_type=False), 
         nullable=False
     )
-    student_id: Mapped[Optional[str]] = mapped_column(String(50))
-    department: Mapped[Optional[str]] = mapped_column(String(100))
 
     def __repr__(self):
         return f"<User {self.id} {self.username} {self.full_name} ({self.role})>"

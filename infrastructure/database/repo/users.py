@@ -8,7 +8,7 @@ from .base import BaseRepo
 
 
 class UserRepo(BaseRepo):
-    async def get_or_create_user(
+    async def create_user(
         self,
         user_id: int,
         full_name: str,
@@ -16,7 +16,7 @@ class UserRepo(BaseRepo):
         role: UserRole = UserRole.STUDENT,
     ) -> User:
         """
-        Creates or updates a new user in the database and returns the user object.
+        Creates a new user in the database and returns the user object.
         """
         insert_stmt = (
             insert(User)
@@ -25,6 +25,28 @@ class UserRepo(BaseRepo):
                 username=username,
                 full_name=full_name,
                 role=role,
+            )
+            .returning(User)
+        )
+        result = await self.session.execute(insert_stmt)
+        await self.session.commit()
+        return result.scalar_one()
+
+    async def update_user(
+        self,
+        user_id: int,
+        full_name: str,
+        username: Optional[str] = None,
+    ) -> Optional[User]:
+        """
+        Updates an existing user in the database and returns the user object.
+        """
+        update_stmt = (
+            insert(User)
+            .values(
+                user_id=user_id,
+                username=username,
+                full_name=full_name,
             )
             .on_conflict_do_update(
                 index_elements=[User.user_id],
@@ -35,11 +57,11 @@ class UserRepo(BaseRepo):
             )
             .returning(User)
         )
-        result = await self.session.execute(insert_stmt)
+        result = await self.session.execute(update_stmt)
         await self.session.commit()
-        return result.scalar_one()
+        return result.scalar_one_or_none()
 
-    async def get_user(self, user_id: int) -> Optional[User]:
+    async def get_user_by_id(self, user_id: int) -> Optional[User]:
         """Get user by ID"""
         return await self.session.get(User, user_id)
 
