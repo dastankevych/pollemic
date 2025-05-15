@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 48fb351d750a
+Revision ID: 77f4b718bc89
 Revises: 
-Create Date: 2025-05-09 08:37:48.755853
+Create Date: 2025-05-15 20:31:34.116763
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '48fb351d750a'
+revision: str = '77f4b718bc89'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,8 +23,10 @@ def upgrade() -> None:
     op.create_table('groups',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
-    sa.Column('type', sa.String(length=20), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('tag', sa.String(length=255), nullable=True),
+    sa.Column('tags', sa.ARRAY(sa.String()), nullable=False),
+    sa.Column('description', sa.String(length=1000), nullable=True),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -33,14 +35,11 @@ def upgrade() -> None:
     sa.Column('username', sa.String(length=128), nullable=True),
     sa.Column('full_name', sa.String(length=128), nullable=False),
     sa.Column('active', sa.Boolean(), server_default=sa.text('true'), nullable=False),
-    sa.Column('language', sa.String(length=10), server_default=sa.text("'en'"), nullable=False),
     sa.Column('role', sa.Enum('STUDENT', 'MENTOR', 'UNIVERSITY_ADMIN', name='user_role_enum'), nullable=False),
-    sa.Column('student_id', sa.String(length=50), nullable=True),
-    sa.Column('department', sa.String(length=100), nullable=True),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('admin_profiles',
+    op.create_table('adminprofiles',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
@@ -48,9 +47,10 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
-    op.create_table('mentor_profiles',
+    op.create_table('mentorprofiles',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.Column('password_hash', sa.String(length=255), nullable=True),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -62,14 +62,16 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=1000), nullable=False),
     sa.Column('questions', sa.JSON(), nullable=False),
     sa.Column('created_by', sa.BigInteger(), nullable=False),
-    sa.Column('is_anonymous', sa.Boolean(), nullable=False),
+    sa.Column('tags', sa.ARRAY(sa.String()), nullable=False),
+    sa.Column('status', sa.String(length=20), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('student_profiles',
+    op.create_table('studentprofiles',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.Column('password_hash', sa.String(length=255), nullable=True),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -79,9 +81,11 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('questionnaire_id', sa.Integer(), nullable=False),
     sa.Column('group_id', sa.BigInteger(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('start_time', postgresql.TIMESTAMP(), nullable=False),
     sa.Column('deadline_time', postgresql.TIMESTAMP(), nullable=False),
     sa.Column('created_by', sa.BIGINT(), nullable=False),
+    sa.Column('updated_at', postgresql.TIMESTAMP(), nullable=True),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
@@ -94,6 +98,7 @@ def upgrade() -> None:
     sa.Column('student_id', sa.BIGINT(), nullable=False),
     sa.Column('answers', sa.JSON(), nullable=False),
     sa.Column('is_completed', sa.Boolean(), nullable=False),
+    sa.Column('submitted_at', sa.TIMESTAMP(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['assignment_id'], ['assignments.id'], ),
     sa.ForeignKeyConstraint(['student_id'], ['users.id'], ),
@@ -106,10 +111,10 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('responses')
     op.drop_table('assignments')
-    op.drop_table('student_profiles')
+    op.drop_table('studentprofiles')
     op.drop_table('questionnaires')
-    op.drop_table('mentor_profiles')
-    op.drop_table('admin_profiles')
+    op.drop_table('mentorprofiles')
+    op.drop_table('adminprofiles')
     op.drop_table('users')
     op.drop_table('groups')
     # ### end Alembic commands ###

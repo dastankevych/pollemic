@@ -146,6 +146,21 @@ class Miscellaneous:
 
 
 @dataclass
+class AuthConfig:
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
+
+    @staticmethod
+    def from_env(env):
+        return AuthConfig(
+            secret_key=env.str("SECRET_KEY"),
+            algorithm=env.str("ALGORITHM", "HS256"),
+            access_token_expire_minutes=env.int("ACCESS_TOKEN_EXPIRE_MINUTES", 480)
+        )
+
+
+@dataclass
 class Config:
     """
     The main configuration class that integrates all the other configuration classes.
@@ -168,6 +183,7 @@ class Config:
     misc: Miscellaneous
     db: Optional[DbConfig] = None
     redis: Optional[RedisConfig] = None
+    auth: Optional[AuthConfig] = None
 
 
 def load_config(path: str = None) -> Config:
@@ -188,4 +204,5 @@ def load_config(path: str = None) -> Config:
         db=DbConfig.from_env(env),
         redis=RedisConfig.from_env(env),
         misc=Miscellaneous(),
+        auth=AuthConfig.from_env(env),
     )

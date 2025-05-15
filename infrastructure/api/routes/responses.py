@@ -10,7 +10,7 @@ from infrastructure.api.dependencies import (
     require_authentication,
     require_mentor_or_admin,
 )
-from infrastructure.database.models import User, Response
+from infrastructure.database.models import User, Response, UserRole
 from infrastructure.database.exceptions import NotFoundError
 
 from infrastructure.api.schemas.response import (
@@ -23,13 +23,14 @@ from infrastructure.api.schemas.response import (
 
 router = APIRouter(prefix="/responses", tags=["responses"])
 
+
 # Helper functions
-def response_to_dict(response: Response, include_answers: bool = True) -> dict:
-    """Convert response model to dictionary"""
+def response_to_dict(response: Response, include_answers: bool = True, anonymize: bool = False) -> dict:
+    """Convert response model to dictionary with option to anonymize student info"""
     result = {
         "id": response.id,
         "assignment_id": response.assignment_id,
-        "student_id": response.student_id,
+        "student_id": response.student_id if not anonymize else None,
         "is_completed": response.is_completed,
         "submitted_at": response.submitted_at.isoformat(),
         "created_at": response.created_at.isoformat(),
@@ -48,13 +49,17 @@ def response_to_dict(response: Response, include_answers: bool = True) -> dict:
         }
         result["assignment"] = assignment_dict
 
-    if hasattr(response, "student") and response.student:
+    # Add student info only if not anonymized
+    if not anonymize and hasattr(response, "student") and response.student:
         student_dict = {
             "user_id": response.student.user_id,
             "full_name": response.student.full_name,
             "username": response.student.username
         }
         result["student"] = student_dict
+    elif anonymize:
+        # Add anonymized student info
+        result["student"] = {"user_id": "anonymous"}
 
     return result
 
@@ -115,7 +120,7 @@ async def list_responses(
 
     Access control:
     - Admins can view all responses with all details
-    - Mentors can view responses, but student details are anonymized for anonymous questionnaires
+    - Mentors can view responses, but student details are anonymized
     - Students can only view their own responses
     """
     try:
@@ -123,8 +128,11 @@ async def list_responses(
         if current_user.is_student():
             # Students can only see their own responses
             student_id = current_user.id
+        elif current_user.is_mentor() and student_id is not None and student_id != current_user.id:
+            # Mentors can filter by student ID, but results will be anonymized
+            pass
         elif not current_user.is_admin() and student_id is not None and student_id != current_user.id:
-            # Non-admins cannot filter by other students' IDs
+            # Non-admins cannot filter by other students' IDs (this is a fallback)
             raise HTTPException(
                 status_code=403,
                 detail="You don't have permission to view other students' responses"
@@ -153,15 +161,14 @@ async def list_responses(
         accessible_responses = []
         for response in responses:
             if can_view_response(current_user, response):
+                # Anonymize student details for mentors
+                anonymize = current_user.is_mentor() and not current_user.is_admin()
 
-                # For mentors viewing anonymous responses, anonymize student details
-                include_student_details = True
-
-                response_dict = response_to_dict(response, include_answers=True)
-
-                # Anonymize if needed
-                if not include_student_details and "student" in response_dict:
-                    response_dict["student"] = {"user_id": "anonymous"}
+                response_dict = response_to_dict(
+                    response,
+                    include_answers=True,
+                    anonymize=anonymize
+                )
 
                 accessible_responses.append(response_dict)
 
@@ -216,7 +223,7 @@ async def get_response(
 
     Access control:
     - Admins can view all responses with all details
-    - Mentors can view responses, but student details are anonymized for anonymous questionnaires
+    - Mentors can view responses, but student details are anonymized
     - Students can only view their own responses
     """
     try:
@@ -231,7 +238,14 @@ async def get_response(
                 detail="You don't have permission to view this response"
             )
 
-        response_dict = response_to_dict(response, include_answers=True)
+        # Anonymize student details for mentors
+        anonymize = current_user.is_mentor() and not current_user.is_admin()
+
+        response_dict = response_to_dict(
+            response,
+            include_answers=True,
+            anonymize=anonymize
+        )
 
         return {
             "status": "success",
@@ -295,10 +309,13 @@ async def submit_response(
             submitted_at=now
         )
 
+        # Anonymize for mentors
+        anonymize = current_user.is_mentor() and not current_user.is_admin()
+
         return {
             "status": "success",
             "message": "Response submitted successfully",
-            "response": response_to_dict(response)
+            "response": response_to_dict(response, anonymize=anonymize)
         }
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -355,10 +372,13 @@ async def update_response(
             submitted_at=datetime.now()
         )
 
+        # Anonymize for mentors
+        anonymize = current_user.is_mentor() and not current_user.is_admin()
+
         return {
             "status": "success",
             "message": "Response updated successfully",
-            "response": response_to_dict(updated_response)
+            "response": response_to_dict(updated_response, anonymize=anonymize)
         }
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -510,7 +530,8 @@ async def get_student_progress(
     Get the progress of a specific student across multiple assignments.
 
     Access control:
-    - Admins and mentors can view any student's progress
+    - Admins can view any student's progress with full details
+    - Mentors can view any student's progress, but without identifying information
     - Students can only view their own progress
     """
     try:
@@ -527,6 +548,18 @@ async def get_student_progress(
             questionnaire_id=questionnaire_id,
             group_id=group_id
         )
+
+        # Anonymize progress for mentors
+        if current_user.is_mentor() and not current_user.is_admin():
+            # Remove or anonymize any identifying information in the progress data
+            if "student_name" in progress:
+                progress["student_name"] = "Anonymous Student"
+
+            if "student_details" in progress:
+                progress["student_details"] = {"id": "anonymous"}
+
+            # Keep the student_id as None to prevent identification
+            progress["student_id"] = None
 
         return {
             "status": "success",

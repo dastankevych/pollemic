@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -13,14 +13,13 @@ from infrastructure.api.schemas.token import (
     LoginRequest,
 )
 
-# Define the auth router
-router = APIRouter(prefix="/auth", tags=["authentication"])
+from tgbot.config import load_config
 
 # Configuration for JWT
-# In production, these should be stored in environment variables
-SECRET_KEY = "your-secret-key-change-this-in-production"  # Use environment variables
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 hours
+config = load_config()
+
+# Define the auth router
+router = APIRouter(prefix="/auth", tags=["authentication"])
 
 # OAuth2 scheme for token validation
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
@@ -30,12 +29,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
 
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=config.auth.access_token_expire_minutes)
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, config.auth.secret_key, algorithm=config.auth.algorithm)
     return encoded_jwt
 
 
@@ -62,7 +61,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), user_repo: UserR
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, config.auth.secret_key, algorithms=[config.auth.algorithm])
         username: str = payload.get("sub")
         user_id: int = payload.get("user_id")
 
@@ -73,7 +72,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), user_repo: UserR
     except jwt.PyJWTError:
         raise credentials_exception
 
-    user = await user_repo.get_user(token_data.user_id)
+    user = await user_repo.get_user_by_id(token_data.user_id)
     if user is None:
         raise credentials_exception
 
@@ -100,10 +99,10 @@ async def login_for_access_token(login_request: LoginRequest, user_repo: UserRep
         if login_request.username == "admin":
             # Fake admin user
             user_id = 123456789  # Admin ID from environment file
-            user = await user_repo.get_user(user_id)
+            user = await user_repo.get_user_by_id(user_id)
             if not user:
                 # Create admin if doesn't exist (for demo)
-                user = await user_repo.get_or_create_user(
+                user = await user_repo.create_user(
                     user_id=user_id,
                     username="admin",
                     full_name="Administrator",
@@ -112,15 +111,14 @@ async def login_for_access_token(login_request: LoginRequest, user_repo: UserRep
         elif login_request.username.startswith("mentor"):
             # Fake mentor users
             mentor_id = 223344556 if login_request.username == "mentor1" else 223344557
-            user = await user_repo.get_user(mentor_id)
+            user = await user_repo.get_user_by_id(mentor_id)
             if not user:
                 # Create mentor if doesn't exist (for demo)
-                user = await user_repo.get_or_create_user(
+                user = await user_repo.create_user(
                     user_id=mentor_id,
                     username=login_request.username,
                     full_name=f"Mentor {login_request.username[-1]}",
                     role=UserRole.MENTOR,
-                    department="Computer Science"
                 )
 
         # Verify password and user exists
@@ -139,9 +137,9 @@ async def login_for_access_token(login_request: LoginRequest, user_repo: UserRep
             )
 
         # Generate access token
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=config.auth.access_token_expire_minutes)
         access_token = create_access_token(
-            data={"sub": user.username or str(user.user_id), "user_id": user.user_id, "role": user.role},
+            data={"sub": user.username or str(user.id), "user_id": user.id, "role": user.role},
             expires_delta=access_token_expires
         )
 
@@ -151,13 +149,11 @@ async def login_for_access_token(login_request: LoginRequest, user_repo: UserRep
             "token": access_token,
             "token_type": "bearer",
             "user": {
-                "user_id": user.user_id,
+                "user_id": user.id,
                 "username": user.username,
                 "full_name": user.full_name,
                 "active": user.active,
-                "language": user.language,
                 "role": user.role,
-                "department": user.department
             }
         }
 
@@ -175,13 +171,11 @@ async def verify_token(current_user: User = Depends(get_current_active_user)):
         "status": "success",
         "authenticated": True,
         "user": {
-            "user_id": current_user.user_id,
+            "user_id": current_user.id,
             "username": current_user.username,
             "full_name": current_user.full_name,
             "active": current_user.active,
-            "language": current_user.language,
             "role": current_user.role,
-            "department": current_user.department
         }
     }
 
@@ -192,12 +186,10 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return {
         "status": "success",
         "user": {
-            "user_id": current_user.user_id,
+            "user_id": current_user.id,
             "username": current_user.username,
             "full_name": current_user.full_name,
             "active": current_user.active,
-            "language": current_user.language,
             "role": current_user.role,
-            "department": current_user.department
         }
     }
