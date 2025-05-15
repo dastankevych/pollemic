@@ -5,8 +5,7 @@ from sqlalchemy import String, Enum as SQLEnum
 from sqlalchemy import BIGINT, Boolean, true
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .base import Base, TimestampMixin, TableNameMixin
-
+from .base import Base, TimestampMixin
 
 class UserRole(str, Enum):
     STUDENT = "student"
@@ -14,7 +13,7 @@ class UserRole(str, Enum):
     UNIVERSITY_ADMIN = "university_admin"
 
 
-class User(Base, TimestampMixin, TableNameMixin):
+class User(Base, TimestampMixin):
     """
     This class represents a User in the application with different roles.
 
@@ -23,10 +22,8 @@ class User(Base, TimestampMixin, TableNameMixin):
         username (Mapped[Optional[str]]): The telegram username of the user.
         full_name (Mapped[str]): The full name of the user.
         active (Mapped[bool]): Indicates whether the user is active or not.
-        language (Mapped[str]): The language preference of the user.
+
         role (Mapped[UserRole]): The role of the user (student/mentor/university_admin)
-        student_id (Mapped[Optional[str]]): Student ID number (only for students)
-        department (Mapped[Optional[str]]): Department name (for mentors and admins)
 
     Methods:
         is_student(): Returns True if the user is a student
@@ -39,7 +36,7 @@ class User(Base, TimestampMixin, TableNameMixin):
     username: Mapped[Optional[str]] = mapped_column(String(128))
     full_name: Mapped[str] = mapped_column(String(128))
     active: Mapped[bool] = mapped_column(Boolean, server_default=true())
-    role: Mapped[UserRole] = mapped_column(
+    role: Mapped["UserRole"] = mapped_column(
         SQLEnum(UserRole, name="user_role_enum", create_type=False), 
         nullable=False
     )

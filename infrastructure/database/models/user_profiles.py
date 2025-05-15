@@ -1,9 +1,7 @@
-from sqlalchemy import ForeignKey, BigInteger
+from sqlalchemy import ForeignKey, BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin
-from .users import User
-
 
 class StudentProfile(Base, TimestampMixin):
     """
@@ -15,8 +13,9 @@ class StudentProfile(Base, TimestampMixin):
     """
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
-
-    user: Mapped[User] = relationship("User", backref="student_profile")
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=True)
+    
+    user: Mapped["User"] = relationship("User", backref="student_profile")
 
 
 class MentorProfile(Base, TimestampMixin):
@@ -30,8 +29,9 @@ class MentorProfile(Base, TimestampMixin):
     """
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
-
-    user: Mapped[User] = relationship("User", backref="mentor_profile")
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=True)
+    
+    user: Mapped["User"] = relationship("User", backref="mentor_profile")
 
 
 class AdminProfile(Base, TimestampMixin):
@@ -47,4 +47,4 @@ class AdminProfile(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
 
-    user: Mapped[User] = relationship("User", backref="admin_profile")
+    user: Mapped["User"] = relationship("User", backref="admin_profile")

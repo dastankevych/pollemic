@@ -13,7 +13,7 @@ from infrastructure.api.dependencies import (
 from infrastructure.database.exceptions import NotFoundError, DatabaseError
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
 
-router = APIRouter(prefix="/questionnaires", tags=["questionnaires"])
+router = APIRouter(prefix="/questionnaire", tags=["questionnaires"])
 
 
 class QuestionModel(BaseModel):

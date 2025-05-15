@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram import Bot
 import jwt
 
+from infrastructure.database.repo.assignments import AssignmentRepo
 from infrastructure.database.repo.base import BaseRepo
 from infrastructure.database.repo.requests import RequestsRepo
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
@@ -56,6 +57,7 @@ get_questionnaire_repo = get_repo_factory(QuestionnaireRepo)
 get_user_repo = get_repo_factory(UserRepo)
 get_requests_repo = get_repo_factory(RequestsRepo)
 get_group_repo = get_repo_factory(GroupRepo)
+get_assignment_repo = get_repo_factory(AssignmentRepo)
 
 
 async def is_api_request(

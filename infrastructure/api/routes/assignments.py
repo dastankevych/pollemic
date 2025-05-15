@@ -1,30 +1,28 @@
-from typing import List, Optional
-from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
-from infrastructure.database.repo.users import UserRepo
-from infrastructure.database.models import Questionnaire
 from infrastructure.api.dependencies import (
     get_questionnaire_repo,
-    get_user_repo,
+    get_assignment_repo,
     get_bot
 )
 from infrastructure.database.exceptions import NotFoundError, DatabaseError
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
+from infrastructure.database.repo.assignments import AssignmentRepo
 
-router = APIRouter(prefix="/assignment", tags=["questionnaires"])
+from .questionnaires import questionnaire_to_dict
+
+router = APIRouter(prefix="/assignment", tags=["assignment"])
 
 
 @router.post("/{assignment_id}/assign")
 async def assign_questionnaire(
     questionnaire_id: int,
-    assignment: QuestionnaireAssign,
+    assignment: AssignmentRepo,
     questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
     """Assign questionnaire to a group"""
     try:
-        questionnaire = await questionnaire_repo.get_questionnaire(questionnaire_id)
+        questionnaire = await questionnaire_repo.get_questionnaire_by_id(questionnaire_id)
         if not questionnaire:
             raise NotFoundError(f"Questionnaire {questionnaire_id} not found")
 
@@ -56,11 +54,11 @@ async def assign_questionnaire(
 
 @router.get("/list")
 async def list_assignments(
-        questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
+        assignment_repo: AssignmentRepo = Depends(get_assignment_repo),
 ):
     """List all questionnaire assignments"""
     try:
-        assignments = await questionnaire_repo.get_active_assignments()
+        assignments = await assignment_repo.get_active_assignments()
         return {
             "status": "success",
             "count": len(assignments),

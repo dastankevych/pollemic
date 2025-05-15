@@ -1,4 +1,4 @@
-from .base import Base
+from .base import Base, TimestampMixin, TableNameMixin
 from .users import User, UserRole
 from .user_profiles import StudentProfile, MentorProfile, AdminProfile
 from .groups import Group

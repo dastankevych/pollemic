@@ -5,7 +5,7 @@ from infrastructure.api.dependencies import get_group_repo
 from infrastructure.database.exceptions import NotFoundError
 from infrastructure.database.repo.groups import GroupRepo
 
-router = APIRouter(prefix="/groups", tags=["groups"])
+router = APIRouter(prefix="/group", tags=["group"])
 
 @router.get("/")
 async def list_groups(

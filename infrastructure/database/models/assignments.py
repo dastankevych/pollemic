@@ -7,9 +7,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .base import Base, TimestampMixin
-from .questionnaires import Questionnaire
-from .groups import Group
-from .users import User
 
 class Assignment(Base, TimestampMixin):
     """

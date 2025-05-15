@@ -3,8 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
 from .base import Base, TimestampMixin
-from .users import User
-from .assignments import Assignment
 
 class Response(Base, TimestampMixin):
     """
@@ -26,4 +24,4 @@ class Response(Base, TimestampMixin):
     submitted_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
 
     assignment: Mapped["Assignment"] = relationship("Assignment", back_populates="responses")
-    student: Mapped[User] = relationship("User")
+    student: Mapped["User"] = relationship("User")
