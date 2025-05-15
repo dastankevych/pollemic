@@ -10,6 +10,7 @@ from infrastructure.database.repo.assignments import AssignmentRepo
 from infrastructure.database.repo.base import BaseRepo
 from infrastructure.database.repo.requests import RequestsRepo
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
+from infrastructure.database.repo.responses import ResponseRepo
 from infrastructure.database.repo.users import UserRepo
 from infrastructure.database.repo.groups import GroupRepo
 from infrastructure.database.models import User, UserRole
@@ -58,6 +59,7 @@ get_user_repo = get_repo_factory(UserRepo)
 get_requests_repo = get_repo_factory(RequestsRepo)
 get_group_repo = get_repo_factory(GroupRepo)
 get_assignment_repo = get_repo_factory(AssignmentRepo)
+get_response_repo = get_repo_factory(ResponseRepo)
 
 
 async def is_api_request(

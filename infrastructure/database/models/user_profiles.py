@@ -41,7 +41,6 @@ class AdminProfile(Base, TimestampMixin):
     Attributes:
         id (Mapped[int]): Primary key
         user_id (Mapped[int]): Foreign key to User table
-        access_level (Mapped[int]): Administrative access level
         user (Mapped[User]): Relationship to User model
     """
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

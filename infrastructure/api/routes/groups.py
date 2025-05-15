@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from infrastructure.api.dependencies import get_group_repo
-from infrastructure.database.exceptions import NotFoundError
 from infrastructure.database.repo.groups import GroupRepo
 
 router = APIRouter(prefix="/group", tags=["group"])

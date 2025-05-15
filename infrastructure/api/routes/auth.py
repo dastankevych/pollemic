@@ -2,13 +2,16 @@ from datetime import datetime, timedelta
 from typing import Optional
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from fastapi.security import OAuth2PasswordBearer
 
 from infrastructure.database.repo.users import UserRepo
 from infrastructure.database.models import User, UserRole
 from infrastructure.api.dependencies import get_user_repo
-from infrastructure.database.exceptions import NotFoundError
+
+from infrastructure.api.schemas.token import (
+    TokenData,
+    LoginRequest,
+)
 
 # Define the auth router
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -21,34 +24,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 hours
 
 # OAuth2 scheme for token validation
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
-
-# Models for authentication
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    user: dict
-
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-    user_id: Optional[int] = None
-    role: Optional[str] = None
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class UserResponse(BaseModel):
-    user_id: int
-    username: Optional[str] = None
-    full_name: str
-    active: bool
-    language: str
-    role: str
-    department: Optional[str] = None
-
 
 # Function to create a JWT token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
