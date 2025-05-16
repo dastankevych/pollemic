@@ -17,21 +17,18 @@ class UserRepo(BaseRepo):
         """
         Creates a new user in the database and returns the user object.
         """
-        try:
-            stmt = insert(User).values(
-                username=username,
-                full_name=full_name,
-                role=role,
-                active=True
-            ).returning(User)
+        stmt = insert(User).values(
+            username=username,
+            full_name=full_name,
+            role=role,
+            active=True
+        ).returning(User)
 
-            result = await self.session.execute(stmt)
+        result = await self.session.execute(stmt)
 
-            user = result.scalar_one()
+        await self.session.commit()
 
-            await self.session.commit()
-
-            return user
+        return result
 
     async def update_user(
         self,

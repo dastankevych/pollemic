@@ -137,10 +137,6 @@ class QuestionnaireRepo(BaseRepo):
             title_search: Search term for questionnaire title
             tags: List of tags to filter by
             question_type: Filter by question type (text, single_choice, multiple_choice, mixed)
-            response_count_min: Minimum number of responses
-            response_count_max: Maximum number of responses
-            completion_rate_min: Minimum completion rate percentage (0-100)
-            completion_rate_max: Maximum completion rate percentage (0-100)
             limit: Maximum number of results to return
             offset: Number of results to skip
             sort_by: Field to sort by (created_at, title, response_count)

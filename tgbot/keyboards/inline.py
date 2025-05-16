@@ -3,6 +3,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from typing import Optional
 
+# put it to config
+QUESTIONNAIRES_PER_PAGE = 20
 
 def get_questionnaire_button(assignment_id: int, bot_username: str) -> InlineKeyboardMarkup:
     """

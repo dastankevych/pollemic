@@ -193,10 +193,6 @@ class AssignmentRepo(BaseRepo):
             end_date_from: Filter assignments ending after this date
             end_date_to: Filter assignments ending before this date
             name_search: Search term for assignment name
-            response_count_min: Minimum number of responses
-            response_count_max: Maximum number of responses
-            completion_rate_min: Minimum completion rate percentage (0-100)
-            completion_rate_max: Maximum completion rate percentage (0-100)
             limit: Maximum number of results to return
             offset: Number of results to skip
             sort_by: Field to sort by (deadline_time, start_time, name, response_count)
@@ -272,7 +268,6 @@ class AssignmentRepo(BaseRepo):
 
         # Handle response count and completion rate filters
         if response_count_min or response_count_max or completion_rate_min or completion_rate_max or sort_by == "response_count":
-            # Create a subquery to count responses and calculate completion rate
             response_stats = (
                 select(
                     Response.assignment_id,
@@ -351,9 +346,9 @@ class AssignmentRepo(BaseRepo):
     async def count_filtered_assignments(
             self,
             status: Optional[List[str]] = None,
-            questionnaire_id: Optional[int] = None,
-            group_id: Optional[int] = None,
-            creator_id: Optional[int] = None,
+            # questionnaire_id: Optional[int] = None,
+            # group_id: Optional[int] = None,
+            # creator_id: Optional[int] = None,
             start_date_from: Optional[datetime] = None,
             start_date_to: Optional[datetime] = None,
             end_date_from: Optional[datetime] = None,
@@ -363,7 +358,6 @@ class AssignmentRepo(BaseRepo):
         """Count assignments matching the filter criteria"""
         query = select(func.count(Assignment.id))
 
-        # Build the where conditions
         conditions = []
         now = datetime.now()
 

@@ -48,7 +48,6 @@ export function WeeklySchedule({
         return date < today
     }
 
-    // Названия дней недели
     const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
     return (
