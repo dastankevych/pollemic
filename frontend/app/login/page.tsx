@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -11,8 +11,10 @@ import { useToast } from "@/hooks/use-toast"
 import { login } from "@/services/auth-service"
 import { useAuth } from "@/components/auth-provider"
 import { debugAuthIssues, fixAuthIssues } from "@/lib/auth-debug"
+import { Loader2 } from "lucide-react"
 
-export default function LoginPage() {
+// Component to handle search params to avoid direct calls in the page component
+function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -124,75 +126,110 @@ export default function LoginPage() {
   };
 
   return (
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold">Login to Pollemic</CardTitle>
+        <CardDescription>Enter your Telegram username and password to access your account</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="username">Telegram Username</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="Username without @ symbol"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Use <strong>admin</strong> for admin access or <strong>mentor1</strong>/<strong>mentor2</strong> for mentor access
+            </p>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              For testing, use <strong>admin123</strong> or <strong>mentor123</strong> respectively
+            </p>
+          </div>
+
+          {errorDetails && (
+            <div className="bg-destructive/10 p-3 rounded-md">
+              <p className="text-sm text-destructive">{errorDetails}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2 w-full"
+                onClick={handleFixAuthIssues}
+              >
+                Attempt to fix issues
+              </Button>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
+          </Button>
+          <div className="text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/contact" className="text-primary underline-offset-4 hover:underline">
+              Contact administrator
+            </Link>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}
+
+// Fallback component for when the suspense is resolving
+function LoginSkeleton() {
+  return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login to Pollemic</CardTitle>
-          <CardDescription>Enter your Telegram username and password to access your account</CardDescription>
+          <div className="h-8 w-3/4 bg-muted animate-pulse rounded"></div>
+          <div className="h-4 w-full bg-muted animate-pulse rounded"></div>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Telegram Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Username without @ symbol"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Use <strong>admin</strong> for admin access or <strong>mentor1</strong>/<strong>mentor2</strong> for mentor access
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                For testing, use <strong>admin123</strong> or <strong>mentor123</strong> respectively
-              </p>
-            </div>
-
-            {errorDetails && (
-              <div className="bg-destructive/10 p-3 rounded-md">
-                <p className="text-sm text-destructive">{errorDetails}</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 w-full"
-                  onClick={handleFixAuthIssues}
-                >
-                  Attempt to fix issues
-                </Button>
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
-            </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link href="/contact" className="text-primary underline-offset-4 hover:underline">
-                Contact administrator
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="h-4 w-1/4 bg-muted animate-pulse rounded"></div>
+            <div className="h-10 w-full bg-muted animate-pulse rounded"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-1/4 bg-muted animate-pulse rounded"></div>
+            <div className="h-10 w-full bg-muted animate-pulse rounded"></div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <div className="h-10 w-full bg-muted animate-pulse rounded"></div>
+        </CardFooter>
       </Card>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+      <Suspense fallback={<LoginSkeleton />}>
+        <LoginForm />
+      </Suspense>
     </div>
   )
 }

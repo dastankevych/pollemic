@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { isAuthenticated, getCurrentUser, initializeAuth, logout } from '@/services/auth-service'
+import { isAuthenticated, getCurrentUser, initializeAuth, logout as logoutService } from '@/services/auth-service'
 import { User } from '@/services/user-service'
 
 // Define the auth context type
@@ -10,6 +10,7 @@ interface AuthContextType {
   user: User | null
   isLoading: boolean
   isLoggedIn: boolean
+  isAdmin: boolean
   login: (path?: string) => void
   logout: () => void
 }
@@ -19,12 +20,15 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   isLoggedIn: false,
+  isAdmin: false,
   login: () => {},
   logout: () => {},
 })
 
-// Hook to use auth context
-export const useAuth = () => useContext(AuthContext)
+// Export the hook to use auth context
+export function useAuth() {
+  return useContext(AuthContext)
+}
 
 interface AuthProviderProps {
   children: ReactNode
@@ -96,15 +100,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const logoutHandler = () => {
-    logout()
+    logoutService()
     setUser(null)
     router.push('/login')
   }
+
+  // Check if the user is an admin (has university_admin role)
+  const isAdmin = user?.role === 'university_admin'
 
   const value = {
     user,
     isLoading,
     isLoggedIn: !!user,
+    isAdmin,
     login: loginHandler,
     logout: logoutHandler,
   }
