@@ -1,5 +1,3 @@
-// frontend/services/auth-service.ts
-
 import { User } from './user-service';
 
 export interface LoginCredentials {
@@ -21,7 +19,15 @@ export interface AuthResponse {
  */
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-        const response = await fetch('/api/auth/login', {
+        // First, ensure we're starting with a clean state
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+
+        // Determine the correct API endpoint
+        const endpoint = '/api/auth/login';
+        console.log('Attempting login to endpoint:', endpoint);
+
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -31,6 +37,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
         });
 
         const data = await response.json();
+        console.log('Login response:', data);
 
         if (!response.ok) {
             throw new Error(data.message || 'Authentication failed');
@@ -38,8 +45,24 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
 
         // Store auth token in localStorage if successful
         if (data.token) {
+            console.log('Storing auth token and user data');
             localStorage.setItem('auth_token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+
+            if (data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
+
+            // Check if redirect URL is specified in the response
+            const redirectUrl = data.redirect_url || '/admin/dashboard';
+            console.log('Login successful, will redirect to:', redirectUrl);
+
+            // Set a flag to indicate we've just logged in successfully
+            sessionStorage.setItem('login_success', 'true');
+
+            // Add a small delay before redirection
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 500);
         }
 
         return data;
@@ -53,8 +76,10 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
  * Logs out the current user
  */
 export function logout(): void {
+    console.log('Logging out user');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('login_success');
 
     // Redirect to login page
     window.location.href = '/login';
@@ -65,7 +90,8 @@ export function logout(): void {
  * @returns Boolean indicating if user is authenticated
  */
 export function isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
+    return !!token;
 }
 
 /**
@@ -99,4 +125,44 @@ export function hasRole(requiredRole: string): boolean {
 
     // Otherwise check for specific role
     return user.role === requiredRole;
+}
+
+/**
+ * Checks if a redirect is required after login
+ * (Used in the dashboard component to handle redirects)
+ */
+export function checkLoginRedirect(): boolean {
+    const success = sessionStorage.getItem('login_success');
+    if (success === 'true') {
+        // Clear the flag so it's a one-time check
+        sessionStorage.removeItem('login_success');
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Initialize auth - check token validity on application startup
+ * Call this in your _app.js or main layout component
+ */
+export async function initializeAuth(): Promise<void> {
+    // If we have a token, verify it
+    if (isAuthenticated()) {
+        try {
+            const response = await fetch('/api/auth/verify', {
+                headers: {
+                    'Authorization': `Bearer ${getAuthToken()}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.warn('Auth token verification failed - logging out');
+                logout();
+            }
+        } catch (error) {
+            console.error('Auth initialization error:', error);
+            // Don't automatically logout on network errors
+        }
+    }
 }

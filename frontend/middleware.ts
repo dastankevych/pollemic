@@ -1,69 +1,62 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Paths that don't require authentication
-const publicPaths = [
-    '/',
-    '/login',
-    '/about',
-    '/contact',
-    '/terms',
-    '/privacy',
-    '/forgot-password'
-]
-
-// Paths that require admin access
-const adminPaths = [
-    '/admin',
-    '/admin/dashboard',
-    '/admin/users',
-    '/admin/settings'
-]
-
+// This middleware handles API routing and authentication redirection
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl
+  const { pathname } = request.nextUrl
 
-    // Check if the path is public
-    if (publicPaths.some(path => pathname === path || pathname.startsWith(path + '/'))) {
-        return NextResponse.next()
-    }
+  // Check if it's an API request
+  if (pathname.startsWith('/api/')) {
+    // Split the path to extract the actual endpoint
+    // Strip '/api' prefix to route to the actual API server
+    const apiPath = pathname.substring(4) // Remove '/api'
 
-    // Get the authentication token
-    const authToken = request.cookies.get('auth_token')?.value
+    // Create the URL to forward to
+    const apiUrl = new URL(apiPath, process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
 
-    // If there's no token, redirect to login
+    // Copy all search params
+    request.nextUrl.searchParams.forEach((value, key) => {
+      apiUrl.searchParams.append(key, value)
+    })
+
+    // Create the rewrite response
+    console.log(`Rewriting API request from ${pathname} to ${apiUrl.toString()}`)
+    return NextResponse.rewrite(apiUrl)
+  }
+
+  // Handle authentication redirects for protected routes
+  if (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/surveys') ||
+    pathname.startsWith('/settings')
+  ) {
+    // Check if we have auth token in cookies or local storage
+    // Note: We cannot access localStorage in middleware, so we use cookies
+    const authToken = request.cookies.get('auth_token')
+
     if (!authToken) {
-        const url = new URL('/login', request.url)
-        url.searchParams.set('callbackUrl', encodeURI(pathname))
-        return NextResponse.redirect(url)
+      // Redirect to login page with return URL
+      const url = new URL('/login', request.url)
+      url.searchParams.set('returnUrl', pathname)
+      return NextResponse.redirect(url)
     }
+  }
 
-    // For paths requiring admin access, check user role
-    if (adminPaths.some(path => pathname === path || pathname.startsWith(path + '/'))) {
-        try {
-            // This is a simplified approach - in a real app, you'd verify the token properly
-            const payload = JSON.parse(atob(authToken.split('.')[1]))
-            const userRole = payload.role
-
-            if (userRole !== 'university_admin') {
-                // Redirect non-admin users to regular dashboard
-                return NextResponse.redirect(new URL('/dashboard', request.url))
-            }
-        } catch (error) {
-            // If token is invalid, redirect to login
-            const url = new URL('/login', request.url)
-            url.searchParams.set('callbackUrl', encodeURI(pathname))
-            return NextResponse.redirect(url)
-        }
-    }
-
-    return NextResponse.next()
+  // For all other routes, continue normal processing
+  return NextResponse.next()
 }
 
+// Configure which paths the middleware runs on
 export const config = {
-    // Specify which paths should run the middleware
-    matcher: [
-        // Match all paths except API routes, static files, and public static files
-        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
-    ],
+  matcher: [
+    // API routes
+    '/api/:path*',
+
+    // Protected pages
+    '/admin/:path*',
+    '/dashboard/:path*',
+    '/surveys/:path*',
+    '/settings/:path*',
+  ],
 }
