@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from sqlalchemy import String, Enum as SQLEnum
-from sqlalchemy import BIGINT, Boolean, true
+from sqlalchemy import BIGINT, Boolean, true, Identity
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, TimestampMixin
@@ -32,7 +32,7 @@ class User(Base, TimestampMixin):
         can_view_anonymous_data(): Returns True if user can view anonymous data
         can_view_full_data(): Returns True if user can view full data
     """
-    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=False)
+    id: Mapped[int] = mapped_column(BIGINT, Identity(always=True), primary_key=True)
     username: Mapped[Optional[str]] = mapped_column(String(128))
     full_name: Mapped[str] = mapped_column(String(128))
     active: Mapped[bool] = mapped_column(Boolean, server_default=true())

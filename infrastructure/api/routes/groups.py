@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from infrastructure.api.dependencies import get_group_repo
 from infrastructure.database.repo.groups import GroupRepo
 
-router = APIRouter(prefix="/group", tags=["group"])
+router = APIRouter(prefix="/groups", tags=["groups"])
 
 @router.get("/")
 async def list_groups(
@@ -20,7 +20,7 @@ async def list_groups(
                 "count": len(groups),
                 "groups": [
                     {
-                        "group_id": group.group_id,
+                        "group_id": group.id,
                         "title": group.title,
                         "is_active": group.is_active
                     } for group in groups
@@ -44,7 +44,7 @@ async def list_active_groups(
                 "count": len(groups),
                 "groups": [
                     {
-                        "group_id": group.group_id,
+                        "group_id": group.id,
                         "title": group.title,
                         "is_active": group.is_active
                     } for group in groups
@@ -61,7 +61,7 @@ async def get_group(
 ):
     """Get a specific group by ID"""
     try:
-        group = await group_repo.get_group(group_id)
+        group = await group_repo.get_group_by_id(group_id)
         if not group:
             raise HTTPException(
                 status_code=404,
@@ -73,7 +73,7 @@ async def get_group(
             content={
                 "status": "success",
                 "group": {
-                    "group_id": group.group_id,
+                    "group_id": group.id,
                     "title": group.title,
                     "is_active": group.is_active
                 }

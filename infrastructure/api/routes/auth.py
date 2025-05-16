@@ -22,7 +22,7 @@ config = load_config()
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 # OAuth2 scheme for token validation
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Function to create a JWT token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -89,33 +89,25 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 # Authenticate user and return token
 @router.post("/login")
 async def login_for_access_token(login_request: LoginRequest, user_repo: UserRepo = Depends(get_user_repo)):
-    # Find user by username
     try:
-        # In real application, query by username
-        # This is a simplified approach for demonstration
         user = None
-        # Query in the database by username
-        # Simplified for demonstration, improve this in production
+
         if login_request.username == "admin":
-            # Fake admin user
-            user_id = 123456789  # Admin ID from environment file
-            user = await user_repo.get_user_by_id(user_id)
+            # First try to find existing admin
+            user = await user_repo.get_user_by_username("admin")
             if not user:
-                # Create admin if doesn't exist (for demo)
+                # Create admin if doesn't exist
                 user = await user_repo.create_user(
-                    user_id=user_id,
                     username="admin",
                     full_name="Administrator",
                     role=UserRole.UNIVERSITY_ADMIN
                 )
         elif login_request.username.startswith("mentor"):
-            # Fake mentor users
-            mentor_id = 223344556 if login_request.username == "mentor1" else 223344557
-            user = await user_repo.get_user_by_id(mentor_id)
+            # Try to find existing mentor
+            user = await user_repo.get_user_by_username(login_request.username)
             if not user:
-                # Create mentor if doesn't exist (for demo)
+                # Create mentor if doesn't exist
                 user = await user_repo.create_user(
-                    user_id=mentor_id,
                     username=login_request.username,
                     full_name=f"Mentor {login_request.username[-1]}",
                     role=UserRole.MENTOR,

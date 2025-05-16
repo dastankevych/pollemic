@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from infrastructure.database.models import User, UserRole
 from .base import BaseRepo
@@ -9,28 +9,29 @@ from .base import BaseRepo
 
 class UserRepo(BaseRepo):
     async def create_user(
-        self,
-        user_id: int,
-        full_name: str,
-        username: Optional[str] = None,
-        role: UserRole = UserRole.STUDENT,
+            self,
+            full_name: str,
+            username: Optional[str] = None,
+            role: UserRole = UserRole.STUDENT,
     ) -> User:
         """
         Creates a new user in the database and returns the user object.
         """
-        insert_stmt = (
-            insert(User)
-            .values(
-                user_id=user_id,
+        try:
+            stmt = insert(User).values(
                 username=username,
                 full_name=full_name,
                 role=role,
-            )
-            .returning(User)
-        )
-        result = await self.session.execute(insert_stmt)
-        await self.session.commit()
-        return result.scalar_one()
+                active=True
+            ).returning(User)
+
+            result = await self.session.execute(stmt)
+
+            user = result.scalar_one()
+
+            await self.session.commit()
+
+            return user
 
     async def update_user(
         self,
@@ -49,7 +50,7 @@ class UserRepo(BaseRepo):
                 full_name=full_name,
             )
             .on_conflict_do_update(
-                index_elements=[User.user_id],
+                index_elements=[User.id],
                 set_=dict(
                     username=username,
                     full_name=full_name,
@@ -65,9 +66,15 @@ class UserRepo(BaseRepo):
         """Get user by ID"""
         return await self.session.get(User, user_id)
 
+    async def get_user_by_username(self, username: str) -> Optional[User]:
+        """Get user by username."""
+        query = select(User).where(User.username == username)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
     async def set_role(self, user_id: int, role: UserRole) -> Optional[User]:
         """Set user role"""
-        user = await self.get_user(user_id)
+        user = await self.get_user_by_id(user_id)
         if user:
             user.role = role
             await self.session.commit()
