@@ -16,7 +16,7 @@ class StudentProfile(Base, TimestampMixin):
     __tablename__ = "student_profiles"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"), unique=True)
 
     user: Mapped[User] = relationship("User", backref="student_profile")
 
@@ -32,7 +32,7 @@ class MentorProfile(Base, TimestampMixin):
     __tablename__ = "mentor_profiles"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"), unique=True)
 
     user: Mapped[User] = relationship("User", backref="mentor_profile")
 
@@ -49,6 +49,6 @@ class AdminProfile(Base, TimestampMixin):
     __tablename__ = "admin_profiles"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"), unique=True)
 
     user: Mapped[User] = relationship("User", backref="admin_profile")

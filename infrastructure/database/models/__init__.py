@@ -2,7 +2,7 @@ from .base import Base
 from .users import User, UserRole
 from .user_profiles import StudentProfile, MentorProfile, AdminProfile
 from .groups import Group
-from .schedules import Schedule, ScheduleType, Weekday
+from .schedules import Schedule, ScheduleType, Weekday, ScheduleGroup
 from .assignments import Assignment
 from .questionnaires import Questionnaire
 from .responses import Response

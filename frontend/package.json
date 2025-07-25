@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "install-next": "npm install next --legacy-peer-deps"
+    "install-next": "npm install next@15.1.0 --legacy-peer-deps"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

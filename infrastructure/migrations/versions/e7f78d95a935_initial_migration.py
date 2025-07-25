@@ -1,8 +1,8 @@
-"""init
+"""Initial migration
 
-Revision ID: 800da86e4248
+Revision ID: e7f78d95a935
 Revises: 
-Create Date: 2025-04-17 12:13:04.046323
+Create Date: 2025-07-25 11:02:01.136315
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '800da86e4248'
+revision: str = 'e7f78d95a935'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,14 +30,16 @@ def upgrade() -> None:
     )
     op.create_table('schedules',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('schedule_type', postgresql.ENUM('SINGLE', 'SPECIFIC_DATES', 'WEEKDAYS', name='schedule_type_enum'), server_default='SINGLE', nullable=False),
-    sa.Column('active', sa.Boolean(), server_default='true', nullable=False),
-    sa.Column('weekdays', sa.Integer(), nullable=True),
-    sa.Column('start_time', sa.Time(), nullable=True),
-    sa.Column('end_time', sa.Time(), nullable=True),
+    sa.Column('schedule_type', sa.String(length=20), nullable=False),
+    sa.Column('one_time_date', sa.Date(), nullable=True),
+    sa.Column('one_time_time', sa.Time(), nullable=True),
+    sa.Column('weekdays', sa.String(length=20), nullable=True),
+    sa.Column('weekly_time', sa.Time(), nullable=True),
+    sa.Column('start_date', sa.Date(), nullable=True),
+    sa.Column('end_date', sa.Date(), nullable=True),
+    sa.Column('specific_time', sa.Time(), nullable=True),
     sa.Column('specific_dates', sa.JSON(), nullable=True),
-    sa.Column('start_date', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('end_date', sa.DateTime(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -54,22 +56,19 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_table('admin_profiles',
-    sa.Column('admin_id', sa.BIGINT(), nullable=False),
-    sa.Column('user_id', sa.BIGINT(), nullable=False),
-    sa.Column('access_level', sa.Integer(), nullable=False),
-    sa.Column('administrative_role', sa.String(length=100), nullable=False),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
-    sa.PrimaryKeyConstraint('admin_id'),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
     op.create_table('mentor_profiles',
-    sa.Column('mentor_id', sa.BIGINT(), nullable=False),
-    sa.Column('user_id', sa.BIGINT(), nullable=False),
-    sa.Column('specialization', sa.String(length=100), nullable=False),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
-    sa.PrimaryKeyConstraint('mentor_id'),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
     op.create_table('questionnaires',
@@ -83,32 +82,37 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['created_by'], ['users.user_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('schedulegroups',
+    sa.Column('schedule_id', sa.Integer(), nullable=False),
+    sa.Column('group_id', sa.BigInteger(), nullable=False),
+    sa.ForeignKeyConstraint(['group_id'], ['groups.group_id'], ),
+    sa.ForeignKeyConstraint(['schedule_id'], ['schedules.id'], ),
+    sa.PrimaryKeyConstraint('schedule_id', 'group_id')
+    )
     op.create_table('student_profiles',
-    sa.Column('student_id', sa.BIGINT(), nullable=False),
-    sa.Column('user_id', sa.BIGINT(), nullable=False),
-    sa.Column('year_of_study', sa.Integer(), nullable=False),
-    sa.Column('major', sa.String(length=100), nullable=False),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
-    sa.PrimaryKeyConstraint('student_id'),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
     op.create_table('assignments',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('questionnaire_id', sa.Integer(), nullable=False),
     sa.Column('group_id', sa.BigInteger(), nullable=False),
-    sa.Column('due_date', sa.DateTime(), nullable=False),
-    sa.Column('schedule_id', sa.Integer(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('start_time', postgresql.TIMESTAMP(), nullable=False),
+    sa.Column('deadline_time', postgresql.TIMESTAMP(), nullable=False),
+    sa.Column('created_by', sa.BIGINT(), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['created_by'], ['users.user_id'], ),
     sa.ForeignKeyConstraint(['group_id'], ['groups.group_id'], ),
     sa.ForeignKeyConstraint(['questionnaire_id'], ['questionnaires.id'], ),
-    sa.ForeignKeyConstraint(['schedule_id'], ['schedules.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('responses',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('assignment_id', sa.Integer(), nullable=False),
+    sa.Column('assignment_id', sa.BigInteger(), nullable=False),
     sa.Column('student_id', sa.BIGINT(), nullable=False),
     sa.Column('answers', sa.JSON(), nullable=False),
     sa.Column('is_completed', sa.Boolean(), nullable=False),
@@ -125,6 +129,7 @@ def downgrade() -> None:
     op.drop_table('responses')
     op.drop_table('assignments')
     op.drop_table('student_profiles')
+    op.drop_table('schedulegroups')
     op.drop_table('questionnaires')
     op.drop_table('mentor_profiles')
     op.drop_table('admin_profiles')

@@ -1,59 +1,4 @@
-### To get started 
-copy `.env.dist` to `.env` and fill in the required data.
-
-
-
-### How to create and register handlers:
-Create a module `your_file_name.py` in the `handlers` folder.
-
-Create a router in `your_file_name.py`.
-```python
-from aiogram import Router
-user_router = Router()
-```
-You can create multiple routers in one module and attach handlers to each of them.
-You can register handlers using decorators:
-```python
-@user_router.message(commands=["start"])
-async def user_start(message):
-    await message.reply("Hello, regular user!")
-```
-
-Go to the `handlers/__init__.py` file and add all routers to it:
-```python
-from .admin import admin_router
-from .echo import echo_router
-from .user import user_router
-
-...
-
-
-routers_list = [
-    admin_router,
-    user_router,
-    echo_router,  # echo_router must be last
-]
-
-```
-### How to add handlers to our bot:
-Go to the `bot.py` file and unpack our handlers:
-```python
-from tgbot.handlers import routers_list
-
-...
-
-async def main():
-   
-    ...
-
-   dp.include_routers(*routers_list)
-
-    ...
-
-
-```
-
-### How to start the Database and make your first migration:
+### How to start get started:
 1. Create the `.env` file and fill according to the given template below.
 ```
 BOT_TOKEN=123456:Your-TokEn_ExaMple
@@ -65,11 +10,14 @@ POSTGRES_PASSWORD=postgres_pass12345
 POSTGRES_DB=bot
 DB_HOST=pg_database
 
+SECRET_KEY=your_secret_key_here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
 REDIS_HOST=redis_cache
 REDIS_PORT=6388
 REDIS_DB=1
 REDIS_PASSWORD=someredispass
-
 
 WEBHOOK_EXPOSE=8001
 WEBHOOK_APP_NAME=webhook
@@ -77,9 +25,9 @@ WEBHOOK_APP_NAME=webhook
 
 2. Go to the `docker-compose.yml` file and uncomment the sections: `api`, `pg_database` and `volumes` to get started.
 
-3. Now we can restart Docker with new containers using the command:
+3. If you don't have any migrations generate it by command:
 
-    `docker-compose exec api alembic upgrade head`
+    `docker-compose exec api alembic revision --autogenerate -m "Initial migration"`
 
 4. Everything is ready! Now we can perform the migration!
 Open terminal and enter the following command:
@@ -101,7 +49,7 @@ The following API endpoints are already implemented and ready for testing:
 - `DELETE /questionnaires/{id}` - Delete questionnaire
 - `POST /questionnaires/{id}/assign` - Assign questionnaire to a group
 
-### What's Already Implemented
+### What's Already Implemented (deprecated since 2025-04-18)
 1. **Basic Infrastructure:**
    - Docker setup with PostgreSQL database
    - Alembic migrations system

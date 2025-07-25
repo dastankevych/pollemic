@@ -149,7 +149,11 @@ async def create_questionnaire(
         if not user:
             raise NotFoundError(f"User with ID {questionnaire.created_by} not found")
 
-        created = await questionnaire_repo.create_questionnaire(**questionnaire.dict())
+        # Extract only the parameters that create_questionnaire accepts
+        questionnaire_data = questionnaire.dict()
+        if 'due_date' in questionnaire_data:
+            questionnaire_data.pop('due_date')  # Remove due_date as it's not accepted by the repository method
+        created = await questionnaire_repo.create_questionnaire(**questionnaire_data)
         return {
             "status": "success",
             "questionnaire_id": created.id

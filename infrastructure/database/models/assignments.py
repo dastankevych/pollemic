@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
-from sqlalchemy import BigInteger, ForeignKey
+from sqlalchemy import BigInteger, ForeignKey, Column, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import expression
 
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
@@ -20,6 +21,7 @@ class Assignment(Base, TimestampMixin):
         id: Primary key
         questionnaire_id: Reference to questionnaire
         group_id: Reference to group
+        schedule_id: Reference to schedule (optional)
 
         start_time: Start time of the assignment
         deadline_time: Deadline time of the assignment
@@ -30,7 +32,8 @@ class Assignment(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     questionnaire_id: Mapped[int] = mapped_column(ForeignKey("questionnaires.id"))
-    group_id: Mapped[List[int]] = mapped_column(ForeignKey("groups.id"))
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.group_id"))
+    schedule_id: Mapped[Optional[int]] = mapped_column(ForeignKey("schedules.id"), nullable=True)
 
     # Schedule 
     start_time: Mapped[datetime] = mapped_column(TIMESTAMP)
@@ -40,5 +43,9 @@ class Assignment(Base, TimestampMixin):
 
     questionnaire: Mapped["Questionnaire"] = relationship("Questionnaire")
     target_group: Mapped["Group"] = relationship("Group")
-    schedule: Mapped["Schedule"] = relationship("Schedule")
+    schedule: Mapped[Optional["Schedule"]] = relationship(
+        "Schedule",
+        primaryjoin="Assignment.schedule_id == Schedule.id",
+        foreign_keys=[schedule_id]
+    )
     creator: Mapped["User"] = relationship("User")

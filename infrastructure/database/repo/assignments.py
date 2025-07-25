@@ -4,7 +4,7 @@ from sqlalchemy import select, update
 from infrastructure.database.models import Assignment
 from .base import BaseRepo
 
-class AssignmentRepo(BaseRepo):
+class AssignmentsRepo(BaseRepo):
     async def create_or_update_assignment(
         self,
         assignment: Assignment,
