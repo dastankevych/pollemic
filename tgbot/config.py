@@ -129,6 +129,42 @@ class RedisConfig:
 
 
 @dataclass
+class AuthConfig:
+    """
+    Authentication configuration class.
+
+    This class holds settings for authentication-related parameters.
+
+    Attributes
+    ----------
+    secret_key : str
+        The secret key used for JWT token encoding/decoding.
+    algorithm : str
+        The algorithm used for JWT token encoding/decoding.
+    access_token_expire_minutes : int
+        The number of minutes after which an access token expires.
+    """
+
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+
+    @staticmethod
+    def from_env(env: Env):
+        """
+        Creates the AuthConfig object from environment variables.
+        """
+        secret_key = env.str("AUTH_SECRET_KEY", "your-secret-key-for-jwt-please-change-in-production")
+        algorithm = env.str("AUTH_ALGORITHM", "HS256")
+        access_token_expire_minutes = env.int("AUTH_TOKEN_EXPIRE_MINUTES", 30)
+        
+        return AuthConfig(
+            secret_key=secret_key,
+            algorithm=algorithm,
+            access_token_expire_minutes=access_token_expire_minutes
+        )
+
+@dataclass
 class Miscellaneous:
     """
     Miscellaneous configuration class.
@@ -162,12 +198,15 @@ class Config:
         Holds the settings specific to the database (default is None).
     redis : Optional[RedisConfig]
         Holds the settings specific to Redis (default is None).
+    auth : Optional[AuthConfig]
+        Holds the settings specific to authentication (default is None).
     """
 
     tg_bot: TgBot
     misc: Miscellaneous
     db: Optional[DbConfig] = None
     redis: Optional[RedisConfig] = None
+    auth: Optional[AuthConfig] = None
 
 
 def load_config(path: str = None) -> Config:
@@ -187,5 +226,6 @@ def load_config(path: str = None) -> Config:
         tg_bot=TgBot.from_env(env),
         db=DbConfig.from_env(env),
         redis=RedisConfig.from_env(env),
+        auth=AuthConfig.from_env(env),
         misc=Miscellaneous(),
     )

@@ -27,6 +27,7 @@ class User(Base, TimestampMixin, TableNameMixin):
         role (Mapped[UserRole]): The role of the user (student/mentor/university_admin)
         student_id (Mapped[Optional[str]]): Student ID number (only for students)
         department (Mapped[Optional[str]]): Department name (for mentors and admins)
+        password_hash (Mapped[Optional[str]]): Hashed password for authentication
 
     Methods:
         is_student(): Returns True if the user is a student
@@ -46,6 +47,7 @@ class User(Base, TimestampMixin, TableNameMixin):
     )
     student_id: Mapped[Optional[str]] = mapped_column(String(50))
     department: Mapped[Optional[str]] = mapped_column(String(100))
+    password_hash: Mapped[Optional[str]] = mapped_column(String(128))
 
     def __repr__(self):
         return f"<User {self.user_id} {self.username} {self.full_name} ({self.role})>"

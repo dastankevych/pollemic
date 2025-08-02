@@ -12,6 +12,7 @@ from infrastructure.api.dependencies import (
 )
 from infrastructure.database.exceptions import NotFoundError, DatabaseError
 from infrastructure.database.repo.questionnaires import QuestionnaireRepo
+from infrastructure.api.security.token import get_current_token_data, TokenData
 
 router = APIRouter(prefix="/questionnaires", tags=["questionnaires"])
 
@@ -45,6 +46,7 @@ class QuestionnaireAssign(BaseModel):
 
 @router.get("/")
 async def list_questionnaires(
+        token_data: TokenData = Depends(get_current_token_data),
         limit: Optional[int] = None,
         questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
@@ -62,6 +64,7 @@ async def list_questionnaires(
 
 @router.get("/latest")
 async def get_latest_questionnaires(
+        token_data: TokenData = Depends(get_current_token_data),
         limit: int = 10,
         questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
@@ -80,9 +83,10 @@ async def get_latest_questionnaires(
 
 @router.post("/{questionnaire_id}/assign")
 async def assign_questionnaire(
-    questionnaire_id: int,
-    assignment: QuestionnaireAssign,
-    questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
+        questionnaire_id: int,
+        assignment: QuestionnaireAssign,
+        token_data: TokenData = Depends(get_current_token_data),
+        questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
     """Assign questionnaire to a group"""
     try:
@@ -119,6 +123,7 @@ async def assign_questionnaire(
 @router.get("/{questionnaire_id}")
 async def get_questionnaire(
         questionnaire_id: int,
+        token_data: TokenData = Depends(get_current_token_data),
         questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
     """Get a specific questionnaire by ID"""
@@ -140,6 +145,7 @@ async def get_questionnaire(
 @router.post("/")
 async def create_questionnaire(
         questionnaire: CreateQuestionnaireRequest,
+        token_data: TokenData = Depends(get_current_token_data),
         questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo),
         user_repo: UserRepo = Depends(get_user_repo)
 ):
@@ -166,9 +172,10 @@ async def create_questionnaire(
 
 @router.put("/{questionnaire_id}")
 async def update_questionnaire(
-    questionnaire_id: int,
-    questionnaire: UpdateQuestionnaireRequest,
-    questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
+        questionnaire_id: int,
+        questionnaire: UpdateQuestionnaireRequest,
+        token_data: TokenData = Depends(get_current_token_data),
+        questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
     """Update an existing questionnaire"""
     try:
@@ -189,6 +196,7 @@ async def update_questionnaire(
 @router.delete("/{questionnaire_id}")
 async def delete_questionnaire(
         questionnaire_id: int,
+        token_data: TokenData = Depends(get_current_token_data),
         questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
     """Delete a questionnaire"""
@@ -206,6 +214,7 @@ async def delete_questionnaire(
 
 @router.get("/assignments")
 async def list_assignments(
+        token_data: TokenData = Depends(get_current_token_data),
         questionnaire_repo: QuestionnaireRepo = Depends(get_questionnaire_repo)
 ):
     """List all questionnaire assignments"""

@@ -4,11 +4,13 @@ from fastapi.responses import JSONResponse
 from infrastructure.api.dependencies import get_group_repo
 from infrastructure.database.exceptions import NotFoundError
 from infrastructure.database.repo.groups import GroupRepo
+from infrastructure.api.security.token import get_current_token_data, TokenData
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
 @router.get("/")
 async def list_groups(
+    token_data: TokenData = Depends(get_current_token_data),
     group_repo: GroupRepo = Depends(get_group_repo)
 ):
     """List all groups"""
@@ -33,6 +35,7 @@ async def list_groups(
 
 @router.get("/active")
 async def list_active_groups(
+    token_data: TokenData = Depends(get_current_token_data),
     group_repo: GroupRepo = Depends(get_group_repo)
 ):
     """List all active groups"""
@@ -58,6 +61,7 @@ async def list_active_groups(
 @router.get("/{group_id}")
 async def get_group(
     group_id: int,
+    token_data: TokenData = Depends(get_current_token_data),
     group_repo: GroupRepo = Depends(get_group_repo)
 ):
     """Get a specific group by ID"""

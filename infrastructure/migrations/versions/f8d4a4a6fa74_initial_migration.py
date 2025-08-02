@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: e7f78d95a935
+Revision ID: f8d4a4a6fa74
 Revises: 
-Create Date: 2025-07-25 11:02:01.136315
+Create Date: 2025-08-02 14:43:36.630127
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'e7f78d95a935'
+revision: str = 'f8d4a4a6fa74'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -101,6 +101,7 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('questionnaire_id', sa.Integer(), nullable=False),
     sa.Column('group_id', sa.BigInteger(), nullable=False),
+    sa.Column('schedule_id', sa.Integer(), nullable=True),
     sa.Column('start_time', postgresql.TIMESTAMP(), nullable=False),
     sa.Column('deadline_time', postgresql.TIMESTAMP(), nullable=False),
     sa.Column('created_by', sa.BIGINT(), nullable=False),
@@ -108,6 +109,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['created_by'], ['users.user_id'], ),
     sa.ForeignKeyConstraint(['group_id'], ['groups.group_id'], ),
     sa.ForeignKeyConstraint(['questionnaire_id'], ['questionnaires.id'], ),
+    sa.ForeignKeyConstraint(['schedule_id'], ['schedules.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('responses',

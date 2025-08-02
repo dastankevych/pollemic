@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -10,39 +10,52 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [inputError, setInputError] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { login, isAuthenticated } = useAuth()
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+    }
+  }, [isAuthenticated, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setInputError(false)
 
     try {
-      // In a real app, this would be an API call to authenticate
-      // For demo purposes, we'll simulate a successful login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const success = await login(username, password)
 
-      // Simulate role-based redirection
-      if (email.includes("admin")) {
-        router.push("/admin/dashboard")
-      } else {
+      if (success) {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Pollemic!",
+        })
         router.push("/dashboard")
+      } else {
+        setInputError(true)
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: "Wrong credentials. Please check your username and password.",
+        })
       }
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Pollemic!",
-      })
     } catch (error) {
+      setInputError(true)
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: "An internal error occurred. Please try again later.",
       })
     } finally {
       setIsLoading(false)
@@ -59,22 +72,20 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Telegram Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="username (without @)"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
+                className={inputError ? "border-red-500" : ""}
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline">
-                  Forgot password?
-                </Link>
               </div>
               <Input
                 id="password"
@@ -82,6 +93,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className={inputError ? "border-red-500" : ""}
               />
             </div>
           </CardContent>
