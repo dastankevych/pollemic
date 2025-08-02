@@ -1,4 +1,5 @@
 // frontend/services/survey-service.ts
+import { getWithAuth, postWithAuth, putWithAuth, deleteWithAuth } from '@/lib/api';
 
 /**
  * Interface representing a question in a survey
@@ -60,21 +61,7 @@ export interface SurveyListResponse {
  */
 export async function createSurvey(surveyData: CreateSurveyRequest): Promise<SurveyResponse> {
   try {
-    const response = await fetch('/questionnaires', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(surveyData)
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to create survey');
-    }
-
+    const data = await postWithAuth<SurveyResponse>('/questionnaires', surveyData);
     return data;
   } catch (error) {
     console.error('Error in createSurvey service:', error);
@@ -90,18 +77,7 @@ export async function createSurvey(surveyData: CreateSurveyRequest): Promise<Sur
 export async function getSurveys(limit?: number): Promise<Survey[]> {
   try {
     const url = limit ? `/questionnaires?limit=${limit}` : '/questionnaires';
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch surveys');
-    }
-
-    const data = await response.json() as SurveyListResponse;
+    const data = await getWithAuth<SurveyListResponse>(url);
     return data.questionnaires || [];
   } catch (error) {
     console.error('Error in getSurveys service:', error);
@@ -116,18 +92,7 @@ export async function getSurveys(limit?: number): Promise<Survey[]> {
  */
 export async function getLatestSurveys(limit: number = 10): Promise<Survey[]> {
   try {
-    const response = await fetch(`/questionnaires/latest?limit=${limit}`, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch latest surveys');
-    }
-
-    const data = await response.json() as SurveyListResponse;
+    const data = await getWithAuth<SurveyListResponse>(`/questionnaires/latest?limit=${limit}`);
     return data.questionnaires || [];
   } catch (error) {
     console.error('Error in getLatestSurveys service:', error);
@@ -142,18 +107,7 @@ export async function getLatestSurveys(limit: number = 10): Promise<Survey[]> {
  */
 export async function getSurveyById(id: number): Promise<Survey> {
   try {
-    const response = await fetch(`/questionnaires/${id}`, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch survey');
-    }
-
-    const data = await response.json() as {status: string, questionnaire: Survey};
+    const data = await getWithAuth<{status: string, questionnaire: Survey}>(`/questionnaires/${id}`);
     return data.questionnaire;
   } catch (error) {
     console.error('Error in getSurveyById service:', error);
@@ -169,21 +123,7 @@ export async function getSurveyById(id: number): Promise<Survey> {
  */
 export async function updateSurvey(id: number, surveyData: Partial<CreateSurveyRequest>): Promise<Survey> {
   try {
-    const response = await fetch(`/questionnaires/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(surveyData)
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to update survey');
-    }
-
-    const data = await response.json();
+    const data = await putWithAuth<{questionnaire: Survey}>(`/questionnaires/${id}`, surveyData);
     return data.questionnaire;
   } catch (error) {
     console.error('Error in updateSurvey service:', error);
@@ -198,17 +138,7 @@ export async function updateSurvey(id: number, surveyData: Partial<CreateSurveyR
  */
 export async function deleteSurvey(id: number): Promise<void> {
   try {
-    const response = await fetch(`/questionnaires/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to delete survey');
-    }
+    await deleteWithAuth<{status: string, message: string}>(`/questionnaires/${id}`);
   } catch (error) {
     console.error('Error in deleteSurvey service:', error);
     throw error;
@@ -224,24 +154,10 @@ export async function deleteSurvey(id: number): Promise<void> {
  */
 export async function assignSurvey(surveyId: number, groupId: number, dueDate: Date): Promise<any> {
   try {
-    const response = await fetch(`/questionnaires/${surveyId}/assign`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        group_id: groupId,
-        due_date: dueDate.toISOString()
-      })
+    const data = await postWithAuth<any>(`/questionnaires/${surveyId}/assign`, {
+      group_id: groupId,
+      due_date: dueDate.toISOString()
     });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to assign survey');
-    }
-
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error in assignSurvey service:', error);

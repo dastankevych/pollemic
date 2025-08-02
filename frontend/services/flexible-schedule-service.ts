@@ -1,4 +1,5 @@
 import { Group } from './schedule-service';
+import { getWithAuth, postWithAuth, putWithAuth, deleteWithAuth } from '@/lib/api';
 
 export type ScheduleType = 'single' | 'dates' | 'weekdays';
 
@@ -69,18 +70,7 @@ export interface ScheduleListResponse {
 export async function getSchedules(activeOnly: boolean = true): Promise<Schedule[]> {
   try {
     const url = `/schedules?active_only=${activeOnly}`;
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch schedules');
-    }
-
-    const data = await response.json() as ScheduleListResponse;
+    const data = await getWithAuth<ScheduleListResponse>(url);
     return data.schedules || [];
   } catch (error) {
     console.error('Error fetching schedules:', error);
@@ -95,18 +85,7 @@ export async function getSchedules(activeOnly: boolean = true): Promise<Schedule
  */
 export async function getScheduleById(scheduleId: number): Promise<Schedule> {
   try {
-    const response = await fetch(`/schedules/${scheduleId}`, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch schedule');
-    }
-
-    const data = await response.json();
+    const data = await getWithAuth<{schedule: Schedule}>(`/schedules/${scheduleId}`);
     return data.schedule;
   } catch (error) {
     console.error('Error fetching schedule:', error);
@@ -121,21 +100,7 @@ export async function getScheduleById(scheduleId: number): Promise<Schedule> {
  */
 export async function createSchedule(scheduleData: CreateScheduleRequest): Promise<ScheduleResponse> {
   try {
-    const response = await fetch('/schedules', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(scheduleData)
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to create schedule');
-    }
-
-    return await response.json();
+    return await postWithAuth<ScheduleResponse>('/schedules', scheduleData);
   } catch (error) {
     console.error('Error creating schedule:', error);
     throw error;
@@ -150,21 +115,7 @@ export async function createSchedule(scheduleData: CreateScheduleRequest): Promi
  */
 export async function updateSchedule(scheduleId: number, scheduleData: UpdateScheduleRequest): Promise<ScheduleResponse> {
   try {
-    const response = await fetch(`/schedules/${scheduleId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(scheduleData)
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to update schedule');
-    }
-
-    return await response.json();
+    return await putWithAuth<ScheduleResponse>(`/schedules/${scheduleId}`, scheduleData);
   } catch (error) {
     console.error('Error updating schedule:', error);
     throw error;
@@ -178,19 +129,7 @@ export async function updateSchedule(scheduleId: number, scheduleData: UpdateSch
  */
 export async function deleteSchedule(scheduleId: number): Promise<ScheduleResponse> {
   try {
-    const response = await fetch(`/schedules/${scheduleId}`, {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to delete schedule');
-    }
-
-    return await response.json();
+    return await deleteWithAuth<ScheduleResponse>(`/schedules/${scheduleId}`);
   } catch (error) {
     console.error('Error deleting schedule:', error);
     throw error;
@@ -203,19 +142,7 @@ export async function deleteSchedule(scheduleId: number): Promise<ScheduleRespon
  */
 export async function processSchedules(): Promise<ScheduleResponse> {
   try {
-    const response = await fetch('/schedules/process', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to process schedules');
-    }
-
-    return await response.json();
+    return await postWithAuth<ScheduleResponse>('/schedules/process', {});
   } catch (error) {
     console.error('Error processing schedules:', error);
     throw error;

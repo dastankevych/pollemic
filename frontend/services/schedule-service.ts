@@ -1,7 +1,8 @@
 import { Survey } from './survey-service';
+import { getWithAuth, postWithAuth } from '@/lib/api';
 
 export interface Group {
-  group_id: number;
+  group_id: number | string;
   title: string;
   is_active: boolean;
 }
@@ -33,28 +34,14 @@ export interface AssignmentResponse {
 export async function getActiveGroups(): Promise<Group[]> {
   try {
     // Try to load from both endpoints to see which one works
-    let response;
+    let data;
     try {
-      response = await fetch('/groups/active', {
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
+      data = await getWithAuth<{status: string, count: number, groups: Group[]}>('/groups/active');
     } catch (error) {
       console.log("Failed to fetch from /groups/active, trying /groups");
-      response = await fetch('/groups', {
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
+      data = await getWithAuth<{status: string, count: number, groups: Group[]}>('/groups');
     }
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch active groups');
-    }
-
-    const data = await response.json();
     // Log the response to debug
     console.log("Groups API response:", data);
 
@@ -89,21 +76,7 @@ export async function assignQuestionnaire(
   assignmentData: AssignmentRequest
 ): Promise<AssignmentResponse> {
   try {
-    const response = await fetch(`/questionnaires/${questionnaireId}/assign`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(assignmentData)
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to assign questionnaire');
-    }
-
-    return await response.json();
+    return await postWithAuth<AssignmentResponse>(`/questionnaires/${questionnaireId}/assign`, assignmentData);
   } catch (error) {
     console.error('Error in assignQuestionnaire service:', error);
     throw error;
@@ -113,18 +86,7 @@ export async function assignQuestionnaire(
 
 export async function getScheduledSurveys(): Promise<ScheduledSurvey[]> {
   try {
-    const response = await fetch('/questionnaires/assignments', {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch scheduled surveys');
-    }
-
-    const data = await response.json();
+    const data = await getWithAuth<{status: string, count: number, assignments: any[]}>('/questionnaires/assignments');
     console.log("Assignments API response:", data); // Add this for debugging
 
     // Transform API data to match the format expected by the UI
