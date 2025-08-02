@@ -12,9 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { SurveyBuilder } from "@/components/survey/survey-builder"
 import { createSurvey, Question, Survey } from "@/services/survey-service"
 import { normalizeSurveyQuestions } from "@/lib/survey-utils"
-
-// Mock user ID - in a real app, this would come from authentication
-const CURRENT_USER_ID = 123456789;
+import { useAuth } from "@/contexts/auth-context"
 
 export default function SurveyCreationForm() {
   const [title, setTitle] = useState("")
@@ -23,6 +21,7 @@ export default function SurveyCreationForm() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { user } = useAuth()
   const surveyBuilderRef = useRef<any>(null)
 
   const handleSaveSurvey = async () => {
@@ -56,7 +55,7 @@ export default function SurveyCreationForm() {
         id: 0, // Temporary ID
         is_anonymous: isAnonymous,
         created_at: new Date().toISOString(),
-        created_by: CURRENT_USER_ID
+        created_by: user?.user_id || 0
       });
 
       // Now questions is guaranteed to be an array
@@ -75,7 +74,7 @@ export default function SurveyCreationForm() {
         description: surveyData.description,
         questions: questions,
         is_anonymous: isAnonymous,
-        created_by: CURRENT_USER_ID
+        created_by: user?.user_id || 0
       };
 
       // Use the survey service to create the survey

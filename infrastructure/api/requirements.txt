@@ -6,6 +6,7 @@ fastapi
 loguru
 python-jose[cryptography]
 passlib[bcrypt]
+python-multipart
 
 aiogram~=3.0
 

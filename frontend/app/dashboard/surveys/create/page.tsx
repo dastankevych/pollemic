@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { SurveyBuilder } from "@/components/survey/survey-builder"
 import { createSurvey, CreateSurveyRequest, Question } from "@/services/survey-service"
 import { Switch } from "@/components/ui/switch"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function CreateSurveyPage() {
   const [title, setTitle] = useState("")
@@ -20,6 +21,7 @@ export default function CreateSurveyPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { user } = useAuth()
   const surveyBuilderRef = useRef<any>(null)
 
   const handleSaveSurvey = async () => {
@@ -95,9 +97,13 @@ export default function CreateSurveyPage() {
     }
   }
 
-  // В реальном приложении это должно приходить из системы аутентификации
+  // Получаем ID пользователя из контекста аутентификации
   const getUserId = (): number => {
-    return 123456789;
+    if (!user) {
+      console.error("User is not authenticated");
+      return 0; // Return a default value or handle this case appropriately
+    }
+    return user.user_id;
   }
 
   return (
