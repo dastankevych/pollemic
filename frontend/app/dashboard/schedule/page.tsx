@@ -943,176 +943,114 @@ export default function SchedulePage() {
                 )}
 
                 <div className="space-y-4">
-                  <div>
-                    <Label className="mb-2 block">Select days of the week</Label>
-                    <div className="grid grid-cols-7 gap-2">
-                      {Object.entries(weekdayMap).map(([dayValue, dayName]) => {
-                        const day = Number.parseInt(dayValue)
-                        const isSelected = weekdays.includes(day)
-                        const hasError = weekdaySettings[day].hasError
-                        return (
-                          <div key={day} className="flex flex-col items-center gap-2">
+                  <div className="flex">
+                    <div className="w-1/4">
+                      <Label className="mb-2 block">Select days of the week</Label>
+                      <div className="flex flex-col gap-2">
+                        {Object.entries(weekdayMap).map(([dayValue, dayName]) => {
+                          const day = Number.parseInt(dayValue)
+                          const isSelected = weekdays.includes(day)
+                          return (
                             <Button
+                              key={day}
                               type="button"
                               variant={isSelected ? "default" : "outline"}
                               className={cn("w-full", isSelected ? "bg-primary text-primary-foreground" : "")}
                               onClick={() => toggleWeekday(day)}
                             >
-                              {dayName.substring(0, 3)}
+                              {dayName}
                             </Button>
-
-                            {isSelected && (
-                              <div className="space-y-2 w-full">
-                                {hasError && weekdaySettings[day].errorMessage && (
-                                  <Alert variant="destructive" className="mb-2 py-2 text-xs">
-                                    <AlertCircle className="h-3 w-3" />
-                                    <AlertDescription className="text-xs">
-                                      {weekdaySettings[day].errorMessage}
-                                    </AlertDescription>
-                                  </Alert>
-                                )}
-
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div>
-                                    <Label htmlFor={`time-${day}`} className={cn(
-                                      "text-xs",
-                                      weekdaySettings[day].hasError && "text-destructive"
-                                    )}>
-                                      Start Time
-                                    </Label>
-                                    <TimePicker
-                                      value={weekdaySettings[day].time}
-                                      onChange={(value) => updateWeekdaySetting(day, "time", value)}
-                                      className={cn(hasError && "border-destructive")}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor={`end-time-${day}`} className={cn(
-                                      "text-xs",
-                                      weekdaySettings[day].hasError && "text-destructive"
-                                    )}>
-                                      End Time
-                                    </Label>
-                                    <TimePicker
-                                      value={weekdaySettings[day].endTime}
-                                      onChange={(value) => updateWeekdaySetting(day, "endTime", value)}
-                                      className={cn(hasError && "border-destructive")}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-1">
-                                  <div>
-                                    <Label htmlFor={`duration-${day}`} className="text-xs">
-                                      Duration (days)
-                                    </Label>
-                                    <div className="flex items-center">
-                                      <Input
-                                        id={`duration-${day}`}
-                                        type="number"
-                                        min="0"
-                                        max="99"
-                                        value={weekdaySettings[day].duration}
-                                        onChange={(e) =>
-                                          updateWeekdaySetting(day, "duration", Number.parseInt(e.target.value) || 0)
-                                        }
-                                        className="w-full"
-                                      />
-                                      <div className="text-xs text-muted-foreground ml-2">
-                                        {weekdaySettings[day].duration === 0
-                                          ? "Same day"
-                                          : weekdaySettings[day].duration === 1
-                                            ? "Next day"
-                                            : `+${weekdaySettings[day].duration} days`}
-                                      </div>
-                                    </div>
-                                    {weekdaySettings[day].duration === 0 && (
-                                      <p className={cn(
-                                        "text-xs mt-1", 
-                                        weekdaySettings[day].hasError ? "text-destructive" : "text-muted-foreground"
-                                      )}>
-                                        <Info className="h-3 w-3 inline mr-1" />
-                                        For same-day schedules, end time must be after start time
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label>Schedule Period</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="start-date"
-                          className={cn("text-sm", formErrors.startDate && "text-destructive")}
-                        >
-                          Start Date {formErrors.startDate && <span className="text-xs">- {formErrors.startDate}</span>}
-                        </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !startDate && "text-muted-foreground",
-                                formErrors.startDate && "border-destructive",
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, "MMMM do, yyyy") : "Select a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={startDate}
-                              onSelect={setStartDate}
-                              initialFocus
-                              disabled={(date) => isPastDate(date)}
-                            />
-                          </PopoverContent>
-                        </Popover>
+                          )
+                        })}
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="end-date" className={cn("text-sm", formErrors.endDate && "text-destructive")}>
-                          End Date {formErrors.endDate && <span className="text-xs">- {formErrors.endDate}</span>}
-                        </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !endDate && "text-muted-foreground",
-                                formErrors.endDate && "border-destructive",
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, "MMMM do, yyyy") : "Select a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={endDate}
-                              onSelect={setEndDate}
-                              initialFocus
-                              disabled={(date) => {
-                                // Disable past dates and dates before start date
-                                if (isPastDate(date)) return true
-                                if (startDate && isBefore(date, startDate)) return true
-                                return false
-                              }}
-                            />
-                          </PopoverContent>
-                        </Popover>
+                    </div>
+                    
+                    <div className="w-1/3 px-4">
+                      <Label className="mb-2 block">Time Settings</Label>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="time" className="text-sm">
+                            Start Time
+                          </Label>
+                          <TimePicker
+                            value={weekdays.length > 0 ? weekdaySettings[weekdays[0]].time : "09:00"}
+                            onChange={(value) => {
+                              // Apply the same time to all selected days
+                              weekdays.forEach(day => {
+                                updateWeekdaySetting(day, "time", value)
+                              })
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="end-time" className="text-sm">
+                            End Time
+                          </Label>
+                          <TimePicker
+                            value={weekdays.length > 0 ? weekdaySettings[weekdays[0]].endTime : "17:00"}
+                            onChange={(value) => {
+                              // Apply the same end time to all selected days
+                              weekdays.forEach(day => {
+                                updateWeekdaySetting(day, "endTime", value)
+                                // Always set duration to 0
+                                updateWeekdaySetting(day, "duration", 0)
+                              })
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                        
+                        {weekdays.length > 0 && weekdaySettings[weekdays[0]].hasError && (
+                          <Alert variant="destructive" className="py-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              For same-day schedules, end time must be after start time
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="w-5/12 pl-4">
+                      <Label className="mb-2 block">Schedule Period</Label>
+                      <div className="space-y-4">
+                        <div className="border rounded-md p-4">
+                          <Calendar
+                            mode="range"
+                            selected={{
+                              from: startDate,
+                              to: endDate
+                            }}
+                            onSelect={(range) => {
+                              if (range?.from) setStartDate(range.from);
+                              if (range?.to) setEndDate(range.to);
+                            }}
+                            numberOfMonths={1}
+                            disabled={(date) => isPastDate(date)}
+                            defaultMonth={startDate}
+                            showOutsideDays={true}
+                          />
+                        </div>
+                        
+                        {(formErrors.startDate || formErrors.endDate) && (
+                          <Alert variant="destructive" className="py-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              {formErrors.startDate || formErrors.endDate}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                        
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <div>
+                            <span className="font-medium">Start:</span> {startDate ? format(startDate, "MMMM do, yyyy") : "Not selected"}
+                          </div>
+                          <div>
+                            <span className="font-medium">End:</span> {endDate ? format(endDate, "MMMM do, yyyy") : "Not selected"}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
